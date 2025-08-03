@@ -192,9 +192,6 @@ body::before {
     margin: 40px auto;
     min-height: 400px;
     display: none; /* Hidden initially */
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
 }
 
 .chat-container.active {
@@ -274,9 +271,6 @@ body::before {
     max-width: 200px;
     margin: 10px auto;
     text-align: center;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
 }
 
 .typing-indicator.active {
@@ -320,9 +314,6 @@ body::before {
     width: 120%;
     max-width: 1000px;
     margin: 40px auto 0;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
 }
 
 .suggestions-title {
