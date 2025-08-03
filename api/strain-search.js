@@ -187,21 +187,17 @@ Insufficient data for strain 'Galactic Runtz'. Contact web@headquarters.co`
 }
 
 function getFallbackResponse(query) {
-  return `🔍 **Searching for: ${query}**
+  return `I'm currently having trouble accessing the strain database, but I can provide some general guidance:
 
-I'm currently having trouble accessing the strain database, but I can provide some general guidance:
+For strain research, typically look for:
+• Genetics & Lineage - Parent strains and breeding history
+• Cannabinoid Profile - THC/CBD percentages and ratios
+• Effects - Physical and mental experiences reported
 
-**For strain research, typically look for:**
-• **Genetics & Lineage** - Parent strains and breeding history
-• **Cannabinoid Profile** - THC/CBD percentages and ratios  
-• **Effects** - Physical and mental experiences reported
+Popular strain categories:
+• Sativa - Often energizing, creative, daytime use
+• Indica - Typically relaxing, sedating, evening use
+• Hybrid - Balanced effects from both types
 
-**Popular strain categories:**
-• **Sativa** - Often energizing, creative, daytime use
-• **Indica** - Typically relaxing, sedating, evening use  
-• **Hybrid** - Balanced effects from both types
-
-Please try your search again in a moment!
-
-*Note: This information is for educational purposes only.*`;
+Please try your search again in a moment!`;
 }

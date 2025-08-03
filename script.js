@@ -526,12 +526,8 @@ document.addEventListener('keydown', function(e) {
 });
 
 function clearChat() {
-    // Keep welcome message but remove others
-    const welcomeMessage = chatMessages.querySelector('.welcome-message');
+    // Remove all messages
     chatMessages.innerHTML = '';
-    if (welcomeMessage) {
-        chatMessages.appendChild(welcomeMessage);
-    }
     
     // Reset conversation history
     conversationHistory = [];
@@ -540,9 +536,7 @@ function clearChat() {
     suggestionsContainer.style.display = 'block';
     
     // Hide chat container if no messages
-    if (chatMessages.children.length <= 1) {
-        chatContainer.classList.remove('active');
-    }
+    chatContainer.classList.remove('active');
 }
 
 // Add smooth scroll behavior for better UX
