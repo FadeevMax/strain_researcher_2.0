@@ -187,11 +187,14 @@ body::before {
 
 /* Chat container */
 .chat-container {
-    width: 1400px;
-    max-width: 90vw;
+    width: 1680px;
+    max-width: 95vw;
     margin: 40px auto;
     min-height: 400px;
     display: none; /* Hidden initially */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .chat-container.active {
