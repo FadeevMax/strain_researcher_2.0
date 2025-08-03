@@ -187,11 +187,14 @@ body::before {
 
 /* Chat container */
 .chat-container {
-    width: 160%;
-    max-width: 1440px;
+    width: 192%;
+    max-width: 1728px;
     margin: 40px auto;
     min-height: 400px;
     display: none; /* Hidden initially */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .chat-container.active {
@@ -271,6 +274,9 @@ body::before {
     max-width: 200px;
     margin: 10px auto;
     text-align: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .typing-indicator.active {
@@ -311,9 +317,12 @@ body::before {
 
 /* Suggestions */
 .suggestions-container {
-    width: 80%;
-    max-width: 720px;
+    width: 120%;
+    max-width: 1000px;
     margin: 40px auto 0;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .suggestions-title {
@@ -411,7 +420,7 @@ body::before {
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1680px;
     margin: 20px auto;
     justify-content: center;
 }
