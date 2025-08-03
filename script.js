@@ -62,10 +62,7 @@ async function searchStrain(query) {
         suggestionsContainer.style.display = 'none';
     }
     
-    // Add user message
-    addMessage(query, 'user');
-    
-    // Show typing indicator
+    // Show typing indicator (skip adding user message)
     showTyping();
     
     try {
