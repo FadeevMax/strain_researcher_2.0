@@ -7,8 +7,6 @@ const typingIndicator = document.getElementById('typing-indicator');
 const suggestionsContainer = document.getElementById('suggestions-container');
 const suggestionBtns = document.querySelectorAll('.suggestion-btn');
 const loadingOverlay = document.getElementById('loading-overlay');
-const strainDashboard = document.getElementById('strain-dashboard');
-const newSearchBtn = document.getElementById('new-search-btn');
 
 // Chat state
 let isTyping = false;
@@ -30,11 +28,6 @@ function initializeApp() {
             searchStrain(strain);
         });
     });
-    
-    // Add new search button listener
-    if (newSearchBtn) {
-        newSearchBtn.addEventListener('click', resetToHome);
-    }
     
     // Focus on input
     strainInput.focus();
@@ -76,43 +69,29 @@ async function searchStrain(query) {
     showTyping();
     
     try {
-        let data;
+        // Make API call to backend
+        const response = await fetch('/api/strain-search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                conversation_history: conversationHistory
+            })
+        });
         
-        // Check if running locally (development mode)
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-            // Use mock data for local testing
-            data = { response: getMockStrainData(query) };
-        } else {
-            // Make API call to backend
-            const response = await fetch('/api/strain-search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    conversation_history: conversationHistory
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            data = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const data = await response.json();
         
         // Hide typing indicator
         hideTyping();
         
-        // Try to parse structured data and show dashboard
-        const parsedData = parseStrainData(data.response);
-        if (parsedData) {
-            showStrainDashboard(parsedData);
-        } else {
-            // Fallback to chat format
-            addMessage(data.response, 'bot');
-        }
+        // Add bot response
+        addMessage(data.response, 'bot');
         
         // Update conversation history
         conversationHistory.push({
@@ -178,6 +157,11 @@ function addMessage(content, sender) {
 }
 
 function formatBotMessage(content) {
+    // Check if this looks like strain data and format as cards
+    if (content.includes('Strain Name:') && content.includes('Hybridization:')) {
+        return formatStrainDataAsCards(content);
+    }
+    
     // Convert markdown-style formatting to HTML
     let formatted = content
         // Bold text
@@ -190,6 +174,299 @@ function formatBotMessage(content) {
         .replace(/^- (.*$)/gim, '• $1');
     
     return formatted;
+}
+
+function formatStrainDataAsCards(content) {
+    const strainData = parseStrainData(content);
+    
+    return `
+        <div class="strain-dashboard">
+            <!-- Name Card -->
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <span class="card-icon">🌿</span>
+                        Name
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    <h4 class="strain-name">${strainData.name}</h4>
+                    ${strainData.altNames ? `
+                        <div class="strain-field">
+                            <h5>Alternative Names</h5>
+                            <div class="strain-badges">
+                                ${strainData.altNames.map(name => `<span class="strain-badge secondary">${name}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.nicknames ? `
+                        <div class="strain-field">
+                            <h5>Nicknames</h5>
+                            <div class="strain-badges">
+                                ${strainData.nicknames.map(name => `<span class="strain-badge outline">${name}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- Attributes Card -->
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <span class="card-icon">⭐</span>
+                        Attributes
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.hybridization ? `
+                        <div class="strain-field">
+                            <h5>Hybridization</h5>
+                            <p>${strainData.hybridization}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.flavors ? `
+                        <div class="strain-field">
+                            <h5>Top Flavors</h5>
+                            <div class="strain-badges">
+                                ${strainData.flavors.map(flavor => `<span class="strain-badge secondary">${flavor}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.effects ? `
+                        <div class="strain-field">
+                            <h5>Top Effects</h5>
+                            <div class="strain-badges">
+                                ${strainData.effects.map(effect => `<span class="strain-badge outline">${effect}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.physicalCharacteristics ? `
+                        <div class="strain-field">
+                            <h5>Physical Characteristics</h5>
+                            <div class="physical-chars">
+                                ${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
+                                ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
+                                ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- History Card -->
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <span class="card-icon">📅</span>
+                        History
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.releaseDate ? `
+                        <div class="strain-field">
+                            <h5>Original Release Date</h5>
+                            <p>${strainData.releaseDate}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.lineage ? `
+                        <div class="strain-field">
+                            <h5>Lineage / Genetics</h5>
+                            <p>${strainData.lineage}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.trivia ? `
+                        <div class="strain-field">
+                            <h5>Trivia (Interesting Facts)</h5>
+                            <p>${strainData.trivia}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.awards ? `
+                        <div class="strain-field">
+                            <h5>Awards</h5>
+                            <div class="awards-list">
+                                ${strainData.awards.map(award => `<div class="award-item"><span class="award-icon">🏆</span>${award}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.similarStrains ? `
+                        <div class="strain-field">
+                            <h5>Similar Strains</h5>
+                            <div class="strain-badges">
+                                ${strainData.similarStrains.map(strain => `<span class="strain-badge secondary">${strain}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- Insights Card -->
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <span class="card-icon">👥</span>
+                        Insights
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.availability ? `
+                        <div class="strain-field">
+                            <h5>Availability by State</h5>
+                            <div class="availability-list">
+                                ${strainData.availability.map(state => `<div class="availability-item"><span class="location-icon">📍</span><span class="strain-badge outline">${state}</span></div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.rating ? `
+                        <div class="strain-field">
+                            <h5>User Rating</h5>
+                            <div class="rating-info">
+                                <div class="rating-score">
+                                    <span class="star-icon">⭐</span>
+                                    <span class="score">${strainData.rating.score}</span>
+                                    <span class="review-count">(${strainData.rating.reviews} reviews)</span>
+                                </div>
+                                ${strainData.rating.commonComments ? `
+                                    <div class="common-comments">
+                                        <h6>Common Comments</h6>
+                                        ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>"${comment}"</div>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function parseStrainData(content) {
+    const data = {
+        name: '',
+        altNames: [],
+        nicknames: [],
+        hybridization: '',
+        flavors: [],
+        effects: [],
+        physicalCharacteristics: {},
+        releaseDate: '',
+        lineage: '',
+        trivia: '',
+        awards: [],
+        similarStrains: [],
+        availability: [],
+        rating: {}
+    };
+
+    // Extract strain name
+    const nameMatch = content.match(/Strain Name:\s*(.+)/);
+    if (nameMatch) data.name = nameMatch[1].trim();
+
+    // Extract alt names
+    const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/);
+    if (altNamesMatch) {
+        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
+    }
+
+    // Extract nicknames
+    const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/);
+    if (nicknamesMatch) {
+        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
+    }
+
+    // Extract hybridization
+    const hybridMatch = content.match(/Hybridization:\s*(.+)/);
+    if (hybridMatch) data.hybridization = hybridMatch[1].trim();
+
+    // Extract flavors
+    const flavorsMatch = content.match(/Reported Flavors \(Top 3\):\s*((?:(?!Reported Effects).)+)/s);
+    if (flavorsMatch) {
+        const flavorsText = flavorsMatch[1].trim();
+        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => flavor.trim()).filter(flavor => flavor);
+    }
+
+    // Extract effects
+    const effectsMatch = content.match(/Reported Effects \(Top 3\):\s*((?:(?!Physical Characteristics|Availability by State).)+)/s);
+    if (effectsMatch) {
+        const effectsText = effectsMatch[1].trim();
+        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => effect.trim()).filter(effect => effect);
+    }
+
+    // Extract physical characteristics
+    const physicalMatch = content.match(/Physical Characteristics \(Color, Bud Structure, Trichomes\):\s*((?:(?!Original Release Date|History).)+)/s);
+    if (physicalMatch) {
+        const physicalText = physicalMatch[1].trim();
+        const lines = physicalText.split(/[-•]\s*/).slice(1);
+        lines.forEach(line => {
+            if (line.toLowerCase().includes('color')) {
+                data.physicalCharacteristics.color = line.trim();
+            } else if (line.toLowerCase().includes('bud') || line.toLowerCase().includes('structure')) {
+                data.physicalCharacteristics.budStructure = line.trim();
+            } else if (line.toLowerCase().includes('trichome')) {
+                data.physicalCharacteristics.trichomes = line.trim();
+            }
+        });
+    }
+
+    // Extract release date
+    const releaseDateMatch = content.match(/Original Release Date:\s*(.+)/);
+    if (releaseDateMatch) data.releaseDate = releaseDateMatch[1].trim();
+
+    // Extract lineage
+    const lineageMatch = content.match(/Lineage \/ Genetics:\s*(.+)/);
+    if (lineageMatch) data.lineage = lineageMatch[1].trim();
+
+    // Extract trivia
+    const triviaMatch = content.match(/Trivia \(Interesting Facts\):\s*((?:(?!Awards).)+)/s);
+    if (triviaMatch) {
+        data.trivia = triviaMatch[1].trim().replace(/[-•]\s*/g, '').trim();
+    }
+
+    // Extract awards
+    const awardsMatch = content.match(/Awards:\s*(.+)/);
+    if (awardsMatch) {
+        const awardsText = awardsMatch[1].trim();
+        if (!awardsText.toLowerCase().includes('unknown')) {
+            data.awards = awardsText.split(',').map(award => award.trim()).filter(award => award);
+        }
+    }
+
+    // Extract similar strains
+    const similarMatch = content.match(/Similar Strains \(Top 3 by effect\/genetics\):\s*((?:(?!User Rating|Insights).)+)/s);
+    if (similarMatch) {
+        const similarText = similarMatch[1].trim();
+        data.similarStrains = similarText.split(/[-•]\s*/).slice(1).map(strain => strain.trim()).filter(strain => strain);
+    }
+
+    // Extract availability
+    const availabilityMatch = content.match(/Availability by State:\s*(.+)/);
+    if (availabilityMatch) {
+        const availabilityText = availabilityMatch[1].trim();
+        data.availability = availabilityText.split(',').map(state => state.trim()).filter(state => state);
+    }
+
+    // Extract user rating
+    const ratingMatch = content.match(/User Rating \(Average Score, # of Reviews, Common Comments\):\s*((?:.|\n)+)/);
+    if (ratingMatch) {
+        const ratingText = ratingMatch[1].trim();
+        
+        // Extract score
+        const scoreMatch = ratingText.match(/(\d+\.?\d*)/);
+        if (scoreMatch) data.rating.score = parseFloat(scoreMatch[1]);
+        
+        // Extract review count
+        const reviewMatch = ratingText.match(/(\d{1,3}(?:,\d{3})*|\d+)/);
+        if (reviewMatch) data.rating.reviews = reviewMatch[1].replace(/,/g, '');
+        
+        // Extract common comments
+        const commentsMatch = ratingText.match(/Common comments include (.+)/);
+        if (commentsMatch) {
+            data.rating.commonComments = commentsMatch[1].split(',').map(comment => comment.trim()).filter(comment => comment);
+        }
+    }
+
+    return data;
 }
 
 function showTyping() {
@@ -249,15 +526,18 @@ document.addEventListener('keydown', function(e) {
 });
 
 function clearChat() {
-    // Reset to home view
-    resetToHome();
-    
     // Keep welcome message but remove others
     const welcomeMessage = chatMessages.querySelector('.welcome-message');
     chatMessages.innerHTML = '';
     if (welcomeMessage) {
         chatMessages.appendChild(welcomeMessage);
     }
+    
+    // Reset conversation history
+    conversationHistory = [];
+    
+    // Show suggestions again
+    suggestionsContainer.style.display = 'block';
     
     // Hide chat container if no messages
     if (chatMessages.children.length <= 1) {
@@ -298,493 +578,52 @@ strainInput.addEventListener('input', function() {
     debouncedSuggestions(this.value);
 });
 
-// Parse strain data from API response
-function parseStrainData(response) {
-    try {
-        // Look for structured markdown data
-        const lines = response.split('\n');
-        const data = {};
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Parse strain name
-            if (line.startsWith('**Strain Name:**')) {
-                data.name = line.replace('**Strain Name:**', '').trim();
-            }
-            // Parse alt names
-            else if (line.startsWith('**Alt Name(s):**')) {
-                const altNames = line.replace('**Alt Name(s):**', '').trim();
-                data.altNames = altNames ? altNames.split(',').map(n => n.trim()) : [];
-            }
-            // Parse nicknames
-            else if (line.startsWith('**Nickname(s):**')) {
-                const nicknames = line.replace('**Nickname(s):**', '').trim();
-                data.nicknames = nicknames ? nicknames.split(',').map(n => n.trim()) : [];
-            }
-            // Parse hybridization
-            else if (line.startsWith('**Hybridization**')) {
-                data.hybridization = line.replace(/\*\*Hybridization[:\s]*\*\*/i, '').trim();
-            }
-            // Parse lineage
-            else if (line.startsWith('**Lineage') || line.startsWith('**Genetics')) {
-                data.lineage = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-            }
-            // Parse trivia
-            else if (line.startsWith('**Trivia')) {
-                let triviaText = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-                // Look for multi-line trivia
-                let j = i + 1;
-                while (j < lines.length && !lines[j].trim().startsWith('**') && lines[j].trim()) {
-                    triviaText += ' ' + lines[j].trim();
-                    j++;
-                }
-                data.trivia = triviaText;
-            }
-            // Parse flavors
-            else if (line.startsWith('**Reported Flavors')) {
-                data.flavors = [];
-                let j = i + 1;
-                while (j < lines.length && (lines[j].trim().startsWith('-') || lines[j].trim().startsWith('•'))) {
-                    const flavor = lines[j].trim().replace(/^[-•]\s*/, '');
-                    if (flavor) data.flavors.push(flavor);
-                    j++;
-                }
-            }
-            // Parse effects
-            else if (line.startsWith('**Reported Effects')) {
-                data.effects = [];
-                let j = i + 1;
-                while (j < lines.length && (lines[j].trim().startsWith('-') || lines[j].trim().startsWith('•'))) {
-                    const effect = lines[j].trim().replace(/^[-•]\s*/, '');
-                    if (effect) data.effects.push(effect);
-                    j++;
-                }
-            }
-            // Parse availability
-            else if (line.startsWith('**Availability')) {
-                data.availability = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-            }
-            // Parse awards
-            else if (line.startsWith('**Awards')) {
-                data.awards = [];
-                let j = i + 1;
-                while (j < lines.length && (lines[j].trim().startsWith('-') || lines[j].trim().startsWith('•'))) {
-                    const award = lines[j].trim().replace(/^[-•]\s*/, '');
-                    if (award) data.awards.push(award);
-                    j++;
-                }
-            }
-            // Parse release date
-            else if (line.startsWith('**Original Release Date') || line.startsWith('**Release Date')) {
-                data.releaseDate = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-            }
-            // Parse physical characteristics
-            else if (line.startsWith('**Physical Characteristics')) {
-                let physicalText = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-                let j = i + 1;
-                while (j < lines.length && !lines[j].trim().startsWith('**') && lines[j].trim()) {
-                    physicalText += ' ' + lines[j].trim();
-                    j++;
-                }
-                data.physicalCharacteristics = physicalText;
-            }
-            // Parse similar strains
-            else if (line.startsWith('**Similar Strains')) {
-                data.similarStrains = [];
-                let j = i + 1;
-                while (j < lines.length && (lines[j].trim().startsWith('-') || lines[j].trim().startsWith('•'))) {
-                    const strain = lines[j].trim().replace(/^[-•]\s*/, '');
-                    if (strain) data.similarStrains.push(strain);
-                    j++;
-                }
-            }
-            // Parse user rating
-            else if (line.startsWith('**User Rating')) {
-                let ratingText = line.replace(/\*\*[^:]*:\*\*/i, '').trim();
-                let j = i + 1;
-                while (j < lines.length && !lines[j].trim().startsWith('**') && lines[j].trim()) {
-                    ratingText += ' ' + lines[j].trim();
-                    j++;
-                }
-                data.userRating = ratingText;
-            }
-        }
-        
-        // Only return data if we have at least a strain name
-        return data.name ? data : null;
-    } catch (error) {
-        console.error('Error parsing strain data:', error);
-        return null;
-    }
-}
+// Test function for card layout (can be removed in production)
+function testCardLayout() {
+    const sampleStrainData = `Strain Name: Sour Diesel
 
-// Show strain dashboard
-function showStrainDashboard(data) {
-    // Hide chat container and show dashboard
-    chatContainer.style.display = 'none';
-    suggestionsContainer.style.display = 'none';
-    strainDashboard.style.display = 'block';
+Alt Name(s): Sour D, Sour Deez
+
+Nickname(s): Sour D
+
+Hybridization: Sativa-dominant hybrid (approximately 90% Sativa, 10% Indica)
+
+Lineage / Genetics: Cross of Chemdawg, Northern Lights, and Skunk No. 1
+
+Trivia (Interesting Facts):
+- Sour Diesel is renowned for its sharp, diesel-like aroma and energizing effects
+- The strain is often associated with creativity, motivation, and mental clarity
+- Its pungent aroma is sometimes compared to the smell of opening a new can of tennis balls
+
+Reported Flavors (Top 3):
+- Diesel/fuel
+- Citrus (tangy, fresh pine, crisp citrus)
+- Earthy/skunky with herbal and spicy undertones
+
+Reported Effects (Top 3):
+- Uplifting euphoria
+- Energizing and motivating
+- Mental clarity and creativity boost
+
+Availability by State: California, Colorado, Washington, Oregon, Michigan, Massachusetts, Illinois, Arizona, New Jersey, New York
+
+Awards: Cannabis Cup Winner 2003, Strain of the Year 2012
+
+Original Release Date: Popularized in the early 1990s
+
+Physical Characteristics (Color, Bud Structure, Trichomes):
+- Tall, lanky plants with long, thin-fingered leaves
+- Loose, wispy, bright green buds with rusty/orange pistils
+- Moderate trichome coverage, less frosty than many modern strains
+
+Similar Strains (Top 3 by effect/genetics):
+- Chemdawg (shared parent)
+- Super Skunk (part of lineage)  
+- Northern Lights (part of lineage)
+
+User Rating (Average Score, # of Reviews, Common Comments):
+- Leafly shows a high popularity with thousands of reviews (8,500+), generally rated very positively for its energizing and creative effects
+- Common comments include praise for its fast-acting cerebral high, distinctive diesel aroma, and effectiveness for stress, depression, and anxiety relief`;
     
-    // Hide main title and search when showing dashboard
-    document.querySelector('.main-title').style.display = 'none';
-    document.querySelector('.search-container').style.display = 'none';
-    
-    // Populate dashboard data
-    populateDashboard(data);
-}
-
-// Populate dashboard with strain data
-function populateDashboard(data) {
-    // Strain name
-    const strainNameEl = document.getElementById('strain-name');
-    if (strainNameEl) strainNameEl.textContent = data.name || 'Unknown Strain';
-    
-    // Alt names
-    const altNamesEl = document.getElementById('alt-names');
-    if (altNamesEl) {
-        altNamesEl.innerHTML = '';
-        if (data.altNames && data.altNames.length > 0) {
-            data.altNames.forEach(name => {
-                const badge = document.createElement('span');
-                badge.className = 'badge secondary';
-                badge.textContent = name;
-                altNamesEl.appendChild(badge);
-            });
-        } else {
-            altNamesEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Nicknames
-    const nicknamesEl = document.getElementById('nicknames');
-    if (nicknamesEl) {
-        nicknamesEl.innerHTML = '';
-        if (data.nicknames && data.nicknames.length > 0) {
-            data.nicknames.forEach(nickname => {
-                const badge = document.createElement('span');
-                badge.className = 'badge outline';
-                badge.textContent = nickname;
-                nicknamesEl.appendChild(badge);
-            });
-        } else {
-            nicknamesEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Hybridization
-    const hybridizationEl = document.getElementById('hybridization');
-    if (hybridizationEl) hybridizationEl.textContent = data.hybridization || 'Unknown';
-    
-    // Flavors
-    const flavorsEl = document.getElementById('flavors');
-    if (flavorsEl) {
-        flavorsEl.innerHTML = '';
-        if (data.flavors && data.flavors.length > 0) {
-            data.flavors.forEach(flavor => {
-                const badge = document.createElement('span');
-                badge.className = 'badge secondary';
-                badge.textContent = flavor;
-                flavorsEl.appendChild(badge);
-            });
-        } else {
-            flavorsEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Effects
-    const effectsEl = document.getElementById('effects');
-    if (effectsEl) {
-        effectsEl.innerHTML = '';
-        if (data.effects && data.effects.length > 0) {
-            data.effects.forEach(effect => {
-                const badge = document.createElement('span');
-                badge.className = 'badge outline';
-                badge.textContent = effect;
-                effectsEl.appendChild(badge);
-            });
-        } else {
-            effectsEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Physical characteristics
-    const physicalEl = document.getElementById('physical-characteristics');
-    if (physicalEl) {
-        physicalEl.innerHTML = '';
-        if (data.physicalCharacteristics) {
-            // Split by common separators and create items
-            const characteristics = data.physicalCharacteristics.split(/[;\n-]/).filter(c => c.trim());
-            characteristics.forEach(char => {
-                const item = document.createElement('div');
-                item.className = 'characteristic-item';
-                item.textContent = char.trim();
-                physicalEl.appendChild(item);
-            });
-        } else {
-            physicalEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Release date
-    const releaseDateEl = document.getElementById('release-date');
-    if (releaseDateEl) releaseDateEl.textContent = data.releaseDate || 'Unknown';
-    
-    // Lineage
-    const lineageEl = document.getElementById('lineage');
-    if (lineageEl) lineageEl.textContent = data.lineage || 'Unknown';
-    
-    // Trivia
-    const triviaEl = document.getElementById('trivia');
-    if (triviaEl) triviaEl.textContent = data.trivia || 'Unknown';
-    
-    // Awards
-    const awardsEl = document.getElementById('awards');
-    if (awardsEl) {
-        awardsEl.innerHTML = '';
-        if (data.awards && data.awards.length > 0) {
-            data.awards.forEach(award => {
-                const item = document.createElement('div');
-                item.className = 'award-item';
-                item.innerHTML = `
-                    <svg class="award-icon" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>${award}</span>
-                `;
-                awardsEl.appendChild(item);
-            });
-        } else {
-            awardsEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Similar strains
-    const similarStrainsEl = document.getElementById('similar-strains');
-    if (similarStrainsEl) {
-        similarStrainsEl.innerHTML = '';
-        if (data.similarStrains && data.similarStrains.length > 0) {
-            data.similarStrains.forEach(strain => {
-                const badge = document.createElement('span');
-                badge.className = 'badge secondary';
-                badge.textContent = strain;
-                similarStrainsEl.appendChild(badge);
-            });
-        } else {
-            similarStrainsEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // Availability
-    const availabilityEl = document.getElementById('availability');
-    if (availabilityEl) {
-        availabilityEl.innerHTML = '';
-        if (data.availability) {
-            // Parse states from availability text
-            const states = data.availability.split(/[,;]/).map(s => s.trim()).filter(s => s);
-            states.forEach(state => {
-                const item = document.createElement('div');
-                item.className = 'availability-item';
-                item.innerHTML = `
-                    <svg class="location-icon" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    <span class="badge outline">${state}</span>
-                `;
-                availabilityEl.appendChild(item);
-            });
-        } else {
-            availabilityEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        }
-    }
-    
-    // User rating
-    const ratingScoreEl = document.getElementById('rating-score');
-    const ratingReviewsEl = document.getElementById('rating-reviews');
-    const commentsEl = document.getElementById('common-comments');
-    
-    if (data.userRating) {
-        // Try to extract rating number and review count
-        const ratingMatch = data.userRating.match(/([0-9.]+)\s*\/\s*5/);
-        const reviewsMatch = data.userRating.match(/([0-9,]+)\s*(?:user\s*)?reviews?/i);
-        
-        if (ratingScoreEl && ratingMatch) {
-            ratingScoreEl.innerHTML = `
-                <svg class="star-icon" viewBox="0 0 24 24" fill="none">
-                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                ${ratingMatch[1]}
-            `;
-        }
-        
-        if (ratingReviewsEl && reviewsMatch) {
-            ratingReviewsEl.textContent = `(${reviewsMatch[1]} reviews)`;
-        }
-        
-        // Extract comments (look for quoted text)
-        if (commentsEl) {
-            commentsEl.innerHTML = '';
-            const commentMatches = data.userRating.match(/"([^"]+)"/g);
-            if (commentMatches) {
-                commentMatches.slice(0, 3).forEach(comment => {
-                    const item = document.createElement('div');
-                    item.className = 'comment-item';
-                    item.innerHTML = `
-                        <div class="comment-dot"></div>
-                        <span>${comment}</span>
-                    `;
-                    commentsEl.appendChild(item);
-                });
-            } else {
-                commentsEl.innerHTML = '<span class="strain-info">No comments available</span>';
-            }
-        }
-    } else {
-        if (ratingScoreEl) ratingScoreEl.innerHTML = '<span class="strain-info">Unknown</span>';
-        if (ratingReviewsEl) ratingReviewsEl.textContent = '';
-        if (commentsEl) commentsEl.innerHTML = '<span class="strain-info">Unknown</span>';
-    }
-}
-
-// Reset to home view
-function resetToHome() {
-    // Show main elements
-    document.querySelector('.main-title').style.display = 'block';
-    document.querySelector('.search-container').style.display = 'block';
-    suggestionsContainer.style.display = 'block';
-    
-    // Hide dashboard
-    strainDashboard.style.display = 'none';
-    chatContainer.style.display = 'none';
-    
-    // Clear input and focus
-    strainInput.value = '';
-    strainInput.focus();
-    
-    // Reset conversation history
-    conversationHistory = [];
-}
-
-// Mock data function for local testing
-function getMockStrainData(query) {
-    const mockData = {
-        "blue dream": `**Strain Name:** Blue Dream
-
-**Alt Name(s):** Blueberry Dream, Azure Haze
-
-**Nickname(s):** BD, The Dream
-
-**Hybridization:** Sativa-dominant Hybrid (60% Sativa, 40% Indica)
-
-**Lineage / Genetics:** Blueberry × Super Silver Haze
-
-**Trivia (Interesting Facts):** One of the most popular strains in California dispensaries. Known for its balanced effects that provide both mental stimulation and physical relaxation.
-
-**Reported Flavors:**
-- Sweet Berry
-- Vanilla 
-- Herbal
-
-**Reported Effects:**
-- Euphoric
-- Creative
-- Relaxed
-
-**Availability by State:** California, Colorado, Washington, Oregon, Nevada
-
-**Awards:**
-- Cannabis Cup Winner 2003
-- Strain of the Year 2012
-
-**Original Release Date:** 2003
-
-**Physical Characteristics:** Deep green with blue undertones; Dense, medium-sized nugs; Abundant crystal coating
-
-**Similar Strains:**
-- Green Crack
-- Sour Diesel
-- Pineapple Express
-
-**User Rating:** Leafly average: 4.6 / 5 from 2,847 user reviews; Common remarks: "Perfect balance", "Great for daytime", "Smooth smoke"`,
-
-        "og kush": `**Strain Name:** OG Kush
-
-**Alt Name(s):** Original Gangster, Ocean Grown
-
-**Nickname(s):** OG, The Kush
-
-**Hybridization:** Indica-dominant Hybrid (75% Indica, 25% Sativa)
-
-**Lineage / Genetics:** Chemdawg × Lemon Thai × Pakistani Kush
-
-**Trivia (Interesting Facts):** The backbone of West Coast cannabis culture. Many popular strains have OG Kush genetics.
-
-**Reported Flavors:**
-- Earthy
-- Pine
-- Woody
-
-**Reported Effects:**
-- Relaxed
-- Happy
-- Euphoric
-
-**Availability by State:** California, Colorado, Washington, Oregon, Nevada, Michigan
-
-**Awards:**
-- High Times Cannabis Cup Winner 1996
-- Medical Cannabis Cup 2014
-
-**Original Release Date:** 1996
-
-**Physical Characteristics:** Dense, sticky buds with orange hairs; Heavy trichome coverage; Forest green color
-
-**Similar Strains:**
-- SFV OG
-- Fire OG
-- Tahoe OG
-
-**User Rating:** Leafly average: 4.3 / 5 from 3,214 user reviews; Common remarks: "Classic strain", "Strong effects", "Great for evening"`,
-
-        "default": `**Strain Name:** ${query.charAt(0).toUpperCase() + query.slice(1)}
-
-**Alt Name(s):** Unknown
-
-**Nickname(s):** Unknown
-
-**Hybridization:** Unknown
-
-**Lineage / Genetics:** Unknown
-
-**Trivia (Interesting Facts):** This is a demo strain for testing the dashboard layout.
-
-**Reported Flavors:**
-- Earthy
-- Citrus
-- Sweet
-
-**Reported Effects:**
-- Relaxed
-- Happy
-- Focused
-
-**Availability by State:** Various states
-
-**Awards:** Unknown
-
-**Original Release Date:** Unknown
-
-**Physical Characteristics:** Dense buds with good trichome coverage
-
-**Similar Strains:**
-- Similar Strain 1
-- Similar Strain 2
-- Similar Strain 3
-
-**User Rating:** Demo rating: 4.2 / 5 from 1,500 user reviews; Common remarks: "Good strain", "Nice effects", "Smooth taste"`
-    };
-    
-    const normalizedQuery = query.toLowerCase().trim();
-    return mockData[normalizedQuery] || mockData.default;
+    return formatBotMessage(sampleStrainData);
 }
