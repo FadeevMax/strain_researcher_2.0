@@ -187,8 +187,8 @@ body::before {
 
 /* Chat container */
 .chat-container {
-    width: 80%;
-    max-width: 720px;
+    width: 160%;
+    max-width: 1440px;
     margin: 40px auto;
     min-height: 400px;
     display: none; /* Hidden initially */
