@@ -187,9 +187,9 @@ body::before {
 
 /* Chat container */
 .chat-container {
-    width: 100%;
-    max-width: 900px;
-    margin: 40px 0;
+    width: 80%;
+    max-width: 720px;
+    margin: 40px auto;
     min-height: 400px;
     display: none; /* Hidden initially */
 }
@@ -228,7 +228,8 @@ body::before {
 }
 
 .bot-message {
-    align-self: flex-start;
+    align-self: center;
+    width: 100%;
 }
 
 .message-content {
@@ -262,13 +263,14 @@ body::before {
 .typing-indicator {
     display: none;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     padding: 20px 24px;
     background: #2a2a2a;
     border-radius: 20px;
-    border-bottom-left-radius: 8px;
     max-width: 200px;
-    margin: 10px 0;
+    margin: 10px auto;
+    text-align: center;
 }
 
 .typing-indicator.active {
@@ -309,9 +311,9 @@ body::before {
 
 /* Suggestions */
 .suggestions-container {
-    width: 100%;
-    max-width: 900px;
-    margin-top: 40px;
+    width: 80%;
+    max-width: 720px;
+    margin: 40px auto 0;
 }
 
 .suggestions-title {
