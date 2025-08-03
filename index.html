@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strain Search - Cannabis Research Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="https://api.builder.io/api/v1/image/assets/TEMP/82e158cd367c16a7b4a51dfb3b5efd30b9fd8e1a?width=264" alt="Strain Search Logo" class="logo">
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="main-title">Strain search time?</h1>
+            
+            <!-- Search Form -->
+            <div class="search-container">
+                <form id="search-form" class="search-form">
+                    <div class="search-input-container">
+                        <input 
+                            type="text" 
+                            id="strain-input" 
+                            class="search-input" 
+                            placeholder="Type in a strain name..."
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="search-button">
+                            <svg class="search-icon send-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13.5 3L20.5 21L13.5 17.5L6.5 21L13.5 3Z" fill="currentColor"/>
+                            </svg>
+                            <svg class="search-icon arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 12L19 12M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container" id="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Welcome message -->
+                    <div class="message bot-message welcome-message">
+                        <div class="message-content">
+                            <div class="message-text">
+                                👋 Welcome to Strain Search! I'm your cannabis research assistant. 
+                                I can help you find information about different cannabis strains, their effects, 
+                                THC/CBD levels, and more. What strain would you like to learn about?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Typing indicator -->
+                <div class="typing-indicator" id="typing-indicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="typing-text">Searching strains...</span>
+                </div>
+            </div>
+
+            <!-- Strain Dashboard -->
+            <div class="strain-dashboard" id="strain-dashboard" style="display: none;">
+                <div class="dashboard-header">
+                    <div class="dashboard-header-content">
+                        <h1 class="dashboard-title">strain.search</h1>
+                        <button class="new-search-btn" id="new-search-btn">New Search</button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Name Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon name-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Name</h2>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="strain-name" id="strain-name"></h3>
+                            <div class="strain-section">
+                                <h4>Alternative Names</h4>
+                                <div class="badges-container" id="alt-names"></div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Nicknames</h4>
+                                <div class="badges-container" id="nicknames"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attributes Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon attributes-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Attributes</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="strain-section">
+                                <h4>Hybridization</h4>
+                                <p class="strain-info" id="hybridization"></p>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Top Flavors</h4>
+                                <div class="badges-container" id="flavors"></div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Top Effects</h4>
+                                <div class="badges-container" id="effects"></div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Physical Characteristics</h4>
+                                <div class="characteristics-list" id="physical-characteristics"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon history-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">History</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="strain-section">
+                                <h4>Release Date</h4>
+                                <p class="strain-info" id="release-date"></p>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Lineage / Genetics</h4>
+                                <p class="strain-info" id="lineage"></p>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Trivia</h4>
+                                <p class="strain-info" id="trivia"></p>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Awards</h4>
+                                <div class="awards-list" id="awards"></div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Similar Strains</h4>
+                                <div class="badges-container" id="similar-strains"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon insights-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M17 21V13.5L12 18.5L7 13.5V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 9L12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Insights</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="strain-section">
+                                <h4>Availability by State</h4>
+                                <div class="availability-list" id="availability"></div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>User Rating</h4>
+                                <div class="rating-container">
+                                    <div class="rating-score" id="rating-score"></div>
+                                    <div class="rating-reviews" id="rating-reviews"></div>
+                                </div>
+                            </div>
+                            <div class="strain-section">
+                                <h4>Common Comments</h4>
+                                <div class="comments-list" id="common-comments"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick suggestions -->
+            <div class="suggestions-container" id="suggestions-container">
+                <div class="suggestions-title">Popular searches:</div>
+                <div class="suggestions">
+                    <button class="suggestion-btn" data-strain="OG Kush">OG Kush</button>
+                    <button class="suggestion-btn" data-strain="Blue Dream">Blue Dream</button>
+                    <button class="suggestion-btn" data-strain="White Widow">White Widow</button>
+                    <button class="suggestion-btn" data-strain="Sour Diesel">Sour Diesel</button>
+                    <button class="suggestion-btn" data-strain="Girl Scout Cookies">Girl Scout Cookies</button>
+                    <button class="suggestion-btn" data-strain="Purple Haze">Purple Haze</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 Strain Search. For educational and research purposes only.</p>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Researching strain information...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
