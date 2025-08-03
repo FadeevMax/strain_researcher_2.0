@@ -325,9 +325,10 @@ body::before {
 
 .suggestions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
-    justify-content: flex-start;
+    justify-content: space-between;
+    overflow-x: auto;
 }
 
 .suggestion-btn {
@@ -341,6 +342,8 @@ body::before {
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .suggestion-btn:hover {
