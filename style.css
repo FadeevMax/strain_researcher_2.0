@@ -268,9 +268,10 @@ body::before {
     padding: 20px 24px;
     background: #2a2a2a;
     border-radius: 20px;
-    max-width: 200px;
-    margin: 10px auto;
+    margin: 20px auto;
     text-align: center;
+    width: fit-content;
+    max-width: 300px;
 }
 
 .typing-indicator.active {
