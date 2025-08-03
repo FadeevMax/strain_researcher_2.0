@@ -1,2 +1,0 @@
-streamlit_local_storage
-streamlit_shadcn_ui
