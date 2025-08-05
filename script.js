@@ -276,7 +276,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">🌿</span>
+                        <span class="card-icon" style="color: #4CAF50;">🍃</span>
                         Name
                     </h3>
                 </div>
@@ -305,7 +305,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">✨</span>
+                        <span class="card-icon" style="color: #9C27B0;">⭐</span>
                         Attributes
                     </h3>
                 </div>
@@ -349,7 +349,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">📚</span>
+                        <span class="card-icon" style="color: #2196F3;">📅</span>
                         History
                     </h3>
                 </div>
@@ -395,7 +395,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">💡</span>
+                        <span class="card-icon" style="color: #FF9800;">👥</span>
                         Insights
                     </h3>
                 </div>
@@ -431,7 +431,6 @@ function formatStrainDataAsCards(content) {
         </div>
         <div class="image-generation-section">
             <button class="generate-image-btn" onclick="generateStrainImage()">
-                <span>🎨</span>
                 Generate Strain Image
             </button>
             <div class="generated-image-container" id="generated-image-container">
@@ -616,7 +615,7 @@ async function generateStrainImage() {
         // Re-enable button
         button.disabled = false;
         button.classList.remove('loading');
-        button.innerHTML = '<span>🎨</span> Generate Strain Image';
+        button.innerHTML = 'Generate Strain Image';
     }
 }
 
