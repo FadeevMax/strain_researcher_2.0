@@ -493,6 +493,8 @@ body::before {
     width: 24px;
     height: 24px;
     object-fit: contain;
+    background: transparent;
+    border: none;
 }
 
 .strain-card-content {
