@@ -605,6 +605,27 @@ async function generateStrainImage() {
             const newImageElement = document.getElementById('generated-image');
             newImageElement.src = `data:image/png;base64,${data.image}`;
             imageContainer.classList.add('active');
+        } else if (data.demo && data.error) {
+            // Show setup instructions for demo mode
+            imageContainer.innerHTML = `
+                <div style="background: #2a2a2a; padding: 24px; border-radius: 12px; margin-top: 20px; text-align: left;">
+                    <h3 style="color: #ffffff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        <span>⚙️</span> Setup Required
+                    </h3>
+                    <p style="color: #a1a1a1; line-height: 1.6; margin-bottom: 16px;">
+                        To generate actual strain images, add one of these API keys to your Vercel environment variables:
+                    </p>
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                        <p style="color: #4CAF50; margin: 0 0 8px 0; font-weight: 600;">Option 1: OpenAI DALL-E 3 (Recommended)</p>
+                        <p style="color: #ccc; font-size: 14px; margin: 0;">Add <code>OPENAI_API_KEY</code> from OpenAI Platform</p>
+                    </div>
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                        <p style="color: #667eea; margin: 0 0 8px 0; font-weight: 600;">Option 2: Hugging Face (Free)</p>
+                        <p style="color: #ccc; font-size: 14px; margin: 0;">Add <code>HUGGINGFACE_API_KEY</code> from Hugging Face</p>
+                    </div>
+                </div>
+            `;
+            imageContainer.classList.add('active');
         } else {
             throw new Error(data.error || 'Failed to generate image');
         }
