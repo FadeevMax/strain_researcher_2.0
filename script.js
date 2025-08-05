@@ -15,6 +15,9 @@ let conversationHistory = [];
 // Add after the existing global variables
 let isResultsView = false;
 
+// Add a global variable to store physical characteristics:
+let currentPhysicalCharacteristics = '';
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -426,6 +429,15 @@ function formatStrainDataAsCards(content) {
                 </div>
             </div>
         </div>
+        <div class="image-generation-section">
+            <button class="generate-image-btn" onclick="generateStrainImage()">
+                <span>🎨</span>
+                Generate Strain Image
+            </button>
+            <div class="generated-image-container" id="generated-image-container">
+                <img class="generated-image" id="generated-image" alt="Generated strain image">
+            </div>
+        </div>
     `;
 }
 
@@ -485,6 +497,9 @@ function parseStrainData(content) {
     const physicalMatch = content.match(/Physical Characteristics \(Color, Bud Structure, Trichomes\):\s*((?:(?!Original Release Date|History).)+)/s);
     if (physicalMatch) {
         const physicalText = physicalMatch[1].trim();
+        // Store the raw text for image generation
+        currentPhysicalCharacteristics = physicalText;
+        // Continue with existing parsing...
         const lines = physicalText.split(/[-•]\s*/).slice(1);
         lines.forEach(line => {
             if (line.toLowerCase().includes('color')) {
@@ -556,6 +571,56 @@ function parseStrainData(content) {
 
     return data;
 }
+
+// Add this function after formatStrainDataAsCards
+async function generateStrainImage() {
+    const button = document.querySelector('.generate-image-btn');
+    const imageContainer = document.getElementById('generated-image-container');
+    const imageElement = document.getElementById('generated-image');
+    
+    // Disable button and show loading
+    button.disabled = true;
+    button.classList.add('loading');
+    button.innerHTML = '<span class="image-loading-spinner"></span> Generating...';
+    
+    try {
+        const response = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                physicalCharacteristics: currentPhysicalCharacteristics
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.image) {
+            // Display the image
+            imageElement.src = `data:image/png;base64,${data.image}`;
+            imageContainer.classList.add('active');
+        } else {
+            throw new Error('No image generated');
+        }
+        
+    } catch (error) {
+        console.error('Error generating image:', error);
+        alert('Failed to generate image. Please try again.');
+    } finally {
+        // Re-enable button
+        button.disabled = false;
+        button.classList.remove('loading');
+        button.innerHTML = '<span>🎨</span> Generate Strain Image';
+    }
+}
+
+// Make the function globally accessible
+window.generateStrainImage = generateStrainImage;
 
 function showTyping() {
     isTyping = true;
