@@ -576,7 +576,6 @@ function parseStrainData(content) {
 async function generateStrainImage() {
     const button = document.querySelector('.generate-image-btn');
     const imageContainer = document.getElementById('generated-image-container');
-    const imageElement = document.getElementById('generated-image');
     
     // Disable button and show loading
     button.disabled = true;
@@ -600,24 +599,14 @@ async function generateStrainImage() {
         
         const data = await response.json();
         
-        if (data.image) {
-            // Display the image
-            imageElement.src = `data:image/png;base64,${data.image}`;
-            imageContainer.classList.add('active');
-        } else if (data.description) {
-            // Show description while image generation is being set up
-            imageContainer.innerHTML = `
-                <div style="background: #2a2a2a; padding: 20px; border-radius: 12px; margin-top: 20px;">
-                    <h3 style="color: #ffffff; margin-bottom: 16px;">Image Generation Preview</h3>
-                    <p style="color: #a1a1a1; line-height: 1.6;">${data.description}</p>
-                    <p style="color: #666; font-size: 14px; margin-top: 16px;">
-                        <em>Visual image generation coming soon...</em>
-                    </p>
-                </div>
-            `;
+        if (data.success && data.image) {
+            // Reset container to show image
+            imageContainer.innerHTML = '<img class="generated-image" id="generated-image" alt="Generated strain image">';
+            const newImageElement = document.getElementById('generated-image');
+            newImageElement.src = `data:image/png;base64,${data.image}`;
             imageContainer.classList.add('active');
         } else {
-            throw new Error('No image or description generated');
+            throw new Error(data.error || 'Failed to generate image');
         }
         
     } catch (error) {

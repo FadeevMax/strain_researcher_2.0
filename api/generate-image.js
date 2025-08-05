@@ -1,5 +1,3 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
 export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,37 +18,85 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Physical characteristics are required' });
     }
 
-    if (!process.env.GOOGLE_API_KEY) {
-        return res.status(500).json({ error: 'Google API key not configured' });
-    }
-
     try {
-        // Initialize Google Gemini client
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         // Create a detailed prompt for cannabis bud image generation
         const prompt = `Studio photograph of a single cannabis bud still on its stem. Based on these physical characteristics: ${physicalCharacteristics}. The bud is set against a COMPLETELY BLACK, non-reflective background. The focus is sharp on the trichomes and pistils. The lighting should ensure the edges of the bud are crisp and clear, with absolutely no white border, halo, or outline. Professional cannabis photography style, high detail, realistic textures.`;
 
-        // Generate content (text response for now since image generation requires special model)
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        // Use OpenAI DALL-E 3 for image generation
+        if (process.env.OPENAI_API_KEY) {
+            const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: "dall-e-3",
+                    prompt: prompt,
+                    n: 1,
+                    size: "1024x1024",
+                    quality: "standard",
+                    response_format: "b64_json"
+                })
+            });
 
-        // For now, return a placeholder response since Gemini image generation 
-        // requires specific model access that may not be available
-        return res.status(200).json({ 
-            success: true,
-            message: "Image generation feature is being set up. Generated description:",
-            description: text,
-            image: null // Will be implemented when image model is available
+            if (openaiResponse.ok) {
+                const data = await openaiResponse.json();
+                const imageData = data.data[0].b64_json;
+                
+                return res.status(200).json({ 
+                    success: true,
+                    image: imageData
+                });
+            }
+        }
+
+        // Fallback: Use Hugging Face Stable Diffusion
+        if (process.env.HUGGINGFACE_API_KEY) {
+            const hfResponse = await fetch(
+                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({
+                        inputs: prompt,
+                        parameters: {
+                            negative_prompt: "blurry, low quality, cartoon, anime, painting, drawing, white background, white border, halo, outline",
+                            num_inference_steps: 30,
+                            guidance_scale: 7.5,
+                            width: 1024,
+                            height: 1024
+                        }
+                    }),
+                }
+            );
+
+            if (hfResponse.ok) {
+                const buffer = await hfResponse.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString('base64');
+                
+                return res.status(200).json({ 
+                    success: true,
+                    image: base64
+                });
+            }
+        }
+
+        // If no API keys are available, return error
+        return res.status(500).json({ 
+            error: 'No image generation API configured. Please add OPENAI_API_KEY or HUGGINGFACE_API_KEY to environment variables.',
+            success: false
         });
 
     } catch (error) {
         console.error('Error generating image:', error);
         return res.status(500).json({ 
             error: 'Failed to generate image',
-            details: error.message 
+            details: error.message,
+            success: false
         });
     }
 }
