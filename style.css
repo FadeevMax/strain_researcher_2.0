@@ -360,6 +360,40 @@ body::before {
     transform: translateY(0);
 }
 
+/* Add after .header section */
+.header.results-view {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header.results-view .logo-container {
+    margin: 0;
+}
+
+.header.results-view .logo {
+    width: 60px;
+    height: 60px;
+}
+
+.new-search-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.new-search-btn:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
 /* Footer */
 .footer {
     padding: 40px 0;
@@ -409,78 +443,110 @@ body::before {
     font-size: 16px;
 }
 
-/* Strain Dashboard Cards */
+/* Replace the entire .strain-dashboard section with: */
 .strain-dashboard {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
     width: 100%;
-    max-width: 1680px;
-    margin: 20px auto;
-    justify-content: center;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
 
 .strain-card {
-    background: #2a2a2a;
-    border: 1px solid #404040;
+    background: #1a1a1a;
+    border: none;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
 
 .strain-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    border-color: #555555;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 .strain-card-header {
-    background: #333333;
-    padding: 16px 20px;
-    border-bottom: 1px solid #404040;
+    background: transparent;
+    padding: 24px 24px 16px 24px;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .strain-card-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: #ffffff;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .card-icon {
     font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
 .strain-card-content {
-    padding: 16px;
+    padding: 0 24px 24px 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    min-height: 400px;
+    gap: 16px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
 }
 
+/* Custom scrollbar */
+.strain-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.strain-card-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.strain-card-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+/* Update name card specific styles */
 .strain-name {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #ffffff;
     margin: 0 0 16px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Update field styles */
 .strain-field {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .strain-field h5 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    color: #a1a1a1;
+    color: #888888;
     margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .strain-field h6 {
@@ -494,9 +560,11 @@ body::before {
     font-size: 16px;
     color: #ffffff;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Update badge styles */
 .strain-badges {
     display: flex;
     flex-wrap: wrap;
@@ -505,25 +573,56 @@ body::before {
 
 .strain-badge {
     display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 24px;
     font-size: 14px;
     font-weight: 500;
     text-align: center;
-    border: 1px solid transparent;
     transition: all 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .strain-badge.secondary {
-    background: #4a4a4a;
+    background: #2a2a2a;
     color: #ffffff;
-    border-color: #5a5a5a;
+    border: none;
 }
 
 .strain-badge.outline {
     background: transparent;
     color: #ffffff;
+    border: 1px solid #444444;
+}
+
+/* Show more button */
+.show-more-btn {
+    background: transparent;
+    border: 1px solid #444444;
+    color: #888888;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+    align-self: flex-start;
+}
+
+.show-more-btn:hover {
     border-color: #666666;
+    color: #ffffff;
+}
+
+/* Hide main title and search when showing results */
+.main-content.results-view .main-title,
+.main-content.results-view .search-container,
+.main-content.results-view .suggestions-container {
+    display: none;
+}
+
+/* Update chat container for results view */
+.chat-container.results-view {
+    margin-top: 20px;
 }
 
 .strain-badge:hover {
@@ -567,14 +666,13 @@ body::before {
     align-items: center;
 }
 
-.availability-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* Update location icons */
+.location-icon {
+    display: none;
 }
 
-.location-icon {
-    font-size: 14px;
+.availability-item {
+    display: inline-block;
 }
 
 .rating-info {
@@ -583,25 +681,27 @@ body::before {
     gap: 16px;
 }
 
+/* Update rating styles */
 .rating-score {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 12px;
 }
 
 .star-icon {
-    font-size: 20px;
+    color: #FFD700;
 }
 
 .score {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     color: #ffffff;
 }
 
 .review-count {
-    font-size: 16px;
-    color: #a1a1a1;
+    font-size: 14px;
+    color: #888888;
 }
 
 .common-comments {
@@ -625,32 +725,10 @@ body::before {
     margin-top: 2px;
 }
 
-/* Responsive adjustments for strain dashboard */
-@media (max-width: 1200px) {
-    .strain-dashboard {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin: 16px auto;
-    }
-}
-
+/* Update responsive styles */
 @media (max-width: 768px) {
     .strain-dashboard {
         grid-template-columns: 1fr;
-        gap: 16px;
-        margin: 16px auto;
-    }
-    
-    .strain-card-content {
-        min-height: auto;
-    }
-    
-    .strain-name {
-        font-size: 24px;
-    }
-    
-    .strain-card-title {
-        font-size: 18px;
     }
 }
 

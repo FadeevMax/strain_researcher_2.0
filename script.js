@@ -12,6 +12,9 @@ const loadingOverlay = document.getElementById('loading-overlay');
 let isTyping = false;
 let conversationHistory = [];
 
+// Add after the existing global variables
+let isResultsView = false;
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -41,6 +44,58 @@ function initializeApp() {
     });
 }
 
+// Add this function after initializeApp()
+function toggleResultsView(show) {
+    isResultsView = show;
+    const header = document.querySelector('.header');
+    const mainContent = document.querySelector('.main-content');
+    const chatContainer = document.getElementById('chat-container');
+    
+    if (show) {
+        header.classList.add('results-view');
+        mainContent.classList.add('results-view');
+        chatContainer.classList.add('results-view');
+        
+        // Add new search button if it doesn't exist
+        if (!document.querySelector('.new-search-btn')) {
+            const newSearchBtn = document.createElement('button');
+            newSearchBtn.className = 'new-search-btn';
+            newSearchBtn.textContent = 'New Search';
+            newSearchBtn.addEventListener('click', resetToSearch);
+            header.appendChild(newSearchBtn);
+        }
+    } else {
+        header.classList.remove('results-view');
+        mainContent.classList.remove('results-view');
+        chatContainer.classList.remove('results-view');
+        
+        // Remove new search button
+        const newSearchBtn = document.querySelector('.new-search-btn');
+        if (newSearchBtn) {
+            newSearchBtn.remove();
+        }
+        
+        // Show search elements again
+        suggestionsContainer.style.display = 'block';
+    }
+}
+
+// Add reset function
+function resetToSearch() {
+    // Clear chat
+    chatMessages.innerHTML = '';
+    conversationHistory = [];
+    
+    // Hide chat container
+    chatContainer.classList.remove('active');
+    
+    // Toggle back to search view
+    toggleResultsView(false);
+    
+    // Focus on search input
+    strainInput.focus();
+}
+
 async function handleSearch(e) {
     e.preventDefault();
     
@@ -56,6 +111,9 @@ async function searchStrain(query) {
     
     // Show chat container if hidden
     chatContainer.classList.add('active');
+
+    // Add this line after showing chat container
+    toggleResultsView(true);
     
     // Hide suggestions after first search
     if (conversationHistory.length === 0) {
@@ -173,6 +231,39 @@ function formatBotMessage(content) {
     return formatted;
 }
 
+// Add this function before formatStrainDataAsCards
+function createShowMoreContent(content, maxHeight = 200) {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.maxHeight = maxHeight + 'px';
+    wrapper.style.overflow = 'hidden';
+    wrapper.innerHTML = content;
+    
+    // Check if content overflows
+    setTimeout(() => {
+        if (wrapper.scrollHeight > maxHeight) {
+            wrapper.style.maxHeight = maxHeight + 'px';
+            
+            const showMoreBtn = document.createElement('button');
+            showMoreBtn.className = 'show-more-btn';
+            showMoreBtn.textContent = 'Show more';
+            showMoreBtn.addEventListener('click', function() {
+                if (wrapper.style.maxHeight === maxHeight + 'px') {
+                    wrapper.style.maxHeight = 'none';
+                    this.textContent = 'Show less';
+                } else {
+                    wrapper.style.maxHeight = maxHeight + 'px';
+                    this.textContent = 'Show more';
+                }
+            });
+            
+            wrapper.appendChild(showMoreBtn);
+        }
+    }, 100);
+    
+    return wrapper.outerHTML;
+}
+
 function formatStrainDataAsCards(content) {
     const strainData = parseStrainData(content);
     
@@ -211,7 +302,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">⭐</span>
+                        <span class="card-icon">✨</span>
                         Attributes
                     </h3>
                 </div>
@@ -255,7 +346,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">📅</span>
+                        <span class="card-icon">📚</span>
                         History
                     </h3>
                 </div>
@@ -301,7 +392,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <span class="card-icon">👥</span>
+                        <span class="card-icon">💡</span>
                         Insights
                     </h3>
                 </div>
