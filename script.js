@@ -456,6 +456,8 @@ function formatStrainDataAsCards(content) {
 function cleanMarkdown(text) {
     if (!text) return text;
     return text
+        // Strip block headers like "=== HISTORY ==="
+        .replace(/^\s*===.*?===\s*$/gm, '')
         .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold markdown
         .replace(/\[\d+\]/g, '')           // Remove reference numbers like [1], [2], etc.
         .replace(/\*([^*]+)\*/g, '$1')     // Remove italic markdown
@@ -603,6 +605,15 @@ function parseStrainData(content) {
         }
     }
 
+    // Remove any trailing " ===" accidentally captured
+    for (const key in data) {
+        if (typeof data[key] === 'string') {
+            data[key] = data[key].replace(/\s*===\s*$/, '');
+        } else if (Array.isArray(data[key])) {
+            data[key] = data[key].map(v => v.replace(/\s*===\s*$/, ''));
+        }
+    }
+    
     return data;
 }
 
