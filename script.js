@@ -286,7 +286,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/458-4589359_leaf-icon-green-leaf-icon.png.jpeg" alt="Name icon">
+                        <img class="card-icon" src="icons/clipart4589359.png" alt="Name icon">
                         Name
                     </h3>
                 </div>
@@ -315,7 +315,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/images-2.jpeg" alt="Attributes icon">
+                        <img class="card-icon" src="icons/purple-outline-star-transparent-background-701751694960656mmu0v1xpdi.png" alt="Attributes icon">
                         Attributes
                     </h3>
                 </div>
