@@ -115,8 +115,8 @@ async function searchStrain(query) {
     // Show chat container if hidden
     chatContainer.classList.add('active');
 
-    // Add this line after showing chat container
-    toggleResultsView(true);
+    // Don't switch to results view immediately - wait for response
+    // toggleResultsView(true); // REMOVE or comment out this line
     
     // Hide suggestions after first search
     if (conversationHistory.length === 0) {
@@ -147,7 +147,10 @@ async function searchStrain(query) {
         
         // Hide typing indicator
         hideTyping();
-        
+
+        // NOW switch to results view after getting the response
+        toggleResultsView(true);
+
         // Add bot response
         addMessage(data.response, 'bot');
         
@@ -222,10 +225,12 @@ function formatBotMessage(content) {
     
     // Convert markdown-style formatting to HTML
     let formatted = content
-        // Bold text
+        // Bold text - handle both ** and *
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italic text
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Remove reference numbers like [1], [2], etc.
+        .replace(/\[\d+\]/g, '')
+        // Italic text (single asterisk)
+        .replace(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g, '<em>$1</em>')
         // Line breaks
         .replace(/\n/g, '<br>')
         // Bullet points
