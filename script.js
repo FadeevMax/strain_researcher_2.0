@@ -315,7 +315,7 @@ function formatStrainDataAsCards(content) {
             <div class="strain-card">
                 <div class="strain-card-header">
                     <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/purple-star-outline.png" alt="Attributes icon">
+                        <img class="card-icon" src="icons//Users/maxfade/Documents/Work/HQ_WORKIING/Strain_Search_Site/icons/1i7di1hctmlg1aokvbm13bth5h-109532f55119e8c88c8b91de2f894a29.png" alt="Attributes icon">
                         Attributes
                     </h3>
                 </div>
