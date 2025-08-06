@@ -572,7 +572,9 @@ function parseStrainData(content) {
     }
 
     // Extract similar strains
-    const similarMatch = content.match(/Similar Strains \(Top 3 by effect\/genetics\):\s*((?:(?!User Rating|Insights).)+)/s);
+    const similarMatch = content.match(
+        /Similar Strains \(Top 3 by effect\/genetics\):\s*([\s\S]*?)(?=\n(?:Availability by State|User Rating|Insights|===|\w.*?:)|$)/
+    );
     if (similarMatch) {
         const similarText = similarMatch[1].trim();
         data.similarStrains = similarText.split(/[-•]\s*/).slice(1).map(strain => strain.trim()).filter(strain => strain);
