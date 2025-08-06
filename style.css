@@ -455,24 +455,25 @@ body::before {
 }
 
 .strain-card {
-    background: #1a1a1a;
-    border: none;
+    background: transparent;  /* Changed from #1a1a1a */
+    border: 1px solid #444444;  /* Added thin grey border */
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: none;  /* Removed shadow for cleaner look */
     position: relative;
 }
 
 .strain-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    border-color: #666666;  /* Lighter border on hover */
+    box-shadow: 0 8px 30px rgba(255, 255, 255, 0.05);  /* Subtle glow on hover */
 }
 
 .strain-card-header {
-    background: transparent;
+    background: transparent;  /* Already set, but ensure it stays transparent */
     padding: 24px 24px 16px 24px;
-    border-bottom: none;
+    border-bottom: 1px solid rgba(68, 68, 68, 0.3);  /* Add subtle border between header and content */
     display: flex;
     align-items: center;
     gap: 12px;
@@ -506,7 +507,8 @@ body::before {
     max-height: 400px;
     overflow-y: auto;
     position: relative;
-    text-align: left;  /* ADD THIS LINE */
+    text-align: left;
+    background: transparent;  /* Ensure transparent background */
 }
 
 /* Custom scrollbar */
@@ -585,15 +587,15 @@ body::before {
 }
 
 .strain-badge.secondary {
-    background: #2a2a2a;
+    background: rgba(42, 42, 42, 0.6);  /* Semi-transparent background */
     color: #ffffff;
-    border: none;
+    border: 1px solid rgba(68, 68, 68, 0.5);  /* Add subtle border */
 }
 
 .strain-badge.outline {
     background: transparent;
     color: #ffffff;
-    border: 1px solid #444444;
+    border: 1px solid #666666;  /* Make border slightly more visible */
 }
 
 /* Show more button */
