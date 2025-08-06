@@ -342,13 +342,16 @@ function formatStrainDataAsCards(content) {
                             </div>
                         </div>
                     ` : ''}
-                    ${strainData.physicalCharacteristics ? `
+                    ${(strainData.physicalCharacteristics && Object.keys(strainData.physicalCharacteristics).length > 0) ? `
                         <div class="strain-field">
                             <h5>Physical Characteristics</h5>
                             <div class="physical-chars">
-                                ${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
-                                ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
-                                ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}
+                                ${strainData.physicalCharacteristics.description ? 
+                                    `<p>${strainData.physicalCharacteristics.description}</p>` : 
+                                    `${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
+                                    ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
+                                    ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`
+                                }
                             </div>
                         </div>
                     ` : ''}
@@ -514,27 +517,32 @@ function parseStrainData(content) {
         data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => effect.trim()).filter(effect => effect);
     }
 
-    // Extract physical characteristics
-    const physicalMatch = content.match(/Physical Characteristics[^:]*:\s*((?:(?!Original Release Date|History|Lineage|Similar Strains).)+)/si);
+    // Extract physical characteristics - more flexible parsing
+    const physicalMatch = content.match(/Physical Characteristics[^:]*:?\s*((?:(?!Original Release Date|History|Lineage|Similar Strains|Availability|User Rating|Awards).)+)/si);
     if (physicalMatch) {
         const physicalText = physicalMatch[1].trim();
         currentPhysicalCharacteristics = physicalText;
         
-        // Parse bud structure specifically
-        const budMatch = physicalText.match(/Bud Structure:\s*([^.]+)/i);
-        if (budMatch) {
-            data.physicalCharacteristics.budStructure = budMatch[1].trim();
-        }
-        
-        // Look for other characteristics in the text
-        if (physicalText.includes('Color:')) {
-            const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
-            if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
-        }
-        
-        if (physicalText.includes('Trichome')) {
-            const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
-            if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
+        // If the whole text doesn't have specific labels, treat it as a general description
+        if (!physicalText.includes('Color:') && !physicalText.includes('Bud Structure:') && !physicalText.includes('Trichome')) {
+            // Store the entire description as bud structure if no specific categories found
+            data.physicalCharacteristics.description = physicalText;
+        } else {
+            // Parse specific characteristics if they exist
+            const budMatch = physicalText.match(/Bud Structure:\s*([^.]+)/i);
+            if (budMatch) {
+                data.physicalCharacteristics.budStructure = budMatch[1].trim();
+            }
+            
+            if (physicalText.includes('Color:')) {
+                const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
+                if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
+            }
+            
+            if (physicalText.includes('Trichome')) {
+                const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
+                if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
+            }
         }
     }
 
