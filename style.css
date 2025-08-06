@@ -236,7 +236,7 @@ body::before {
 }
 
 .message-content {
-    background: #262626;
+    background: transparent;  /* Changed from #262626 */
     padding: 20px 24px;
     border-radius: 20px;
     position: relative;
@@ -248,7 +248,8 @@ body::before {
 }
 
 .bot-message .message-content {
-    background: #2a2a2a;
+    background: transparent;  /* Changed from #2a2a2a */
+    border: none;  /* Remove border if you don't want any container */
     border-bottom-left-radius: 8px;
 }
 
@@ -452,6 +453,7 @@ body::before {
     max-width: 1200px;
     margin: 40px auto;
     padding: 0 20px;
+    background: transparent;  /* Add this line to ensure no background */
 }
 
 .strain-card {
