@@ -445,6 +445,14 @@ function formatStrainDataAsCards(content) {
     `;
 }
 
+function cleanMarkdown(text) {
+    if (!text) return text;
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold markdown
+        .replace(/\[\d+\]/g, '')           // Remove reference numbers
+        .replace(/\*([^*]+)\*/g, '$1');    // Remove italic markdown
+}
+
 function parseStrainData(content) {
     const data = {
         name: '',
@@ -465,36 +473,36 @@ function parseStrainData(content) {
 
     // Extract strain name
     const nameMatch = content.match(/Strain Name:\s*(.+)/);
-    if (nameMatch) data.name = nameMatch[1].trim();
+    if (nameMatch) data.name = cleanMarkdown(nameMatch[1].trim());
 
     // Extract alt names
     const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/);
     if (altNamesMatch) {
-        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
+        data.altNames = altNamesMatch[1].split(',').map(name => cleanMarkdown(name.trim())).filter(name => name);
     }
 
     // Extract nicknames
     const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/);
     if (nicknamesMatch) {
-        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
+        data.nicknames = nicknamesMatch[1].split(',').map(name => cleanMarkdown(name.trim())).filter(name => name);
     }
 
     // Extract hybridization
     const hybridMatch = content.match(/Hybridization:\s*(.+)/);
-    if (hybridMatch) data.hybridization = hybridMatch[1].trim();
+    if (hybridMatch) data.hybridization = cleanMarkdown(hybridMatch[1].trim());
 
     // Extract flavors
     const flavorsMatch = content.match(/Reported Flavors \(Top 3\):\s*((?:(?!Reported Effects).)+)/s);
     if (flavorsMatch) {
         const flavorsText = flavorsMatch[1].trim();
-        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => flavor.trim()).filter(flavor => flavor);
+        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => cleanMarkdown(flavor.trim())).filter(flavor => flavor);
     }
 
     // Extract effects
     const effectsMatch = content.match(/Reported Effects \(Top 3\):\s*((?:(?!Physical Characteristics|Availability by State).)+)/s);
     if (effectsMatch) {
         const effectsText = effectsMatch[1].trim();
-        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => effect.trim()).filter(effect => effect);
+        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => cleanMarkdown(effect.trim())).filter(effect => effect);
     }
 
     // Extract physical characteristics
