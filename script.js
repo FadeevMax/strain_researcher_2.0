@@ -219,22 +219,24 @@ function addMessage(content, sender) {
 
 function formatBotMessage(content) {
     // Check if this looks like strain data and format as cards
-    if (content.includes('Strain Name:') && content.includes('Hybridization:')) {
+    if (content.includes('Strain Name:') || content.includes('Name:')) {
         return formatStrainDataAsCards(content);
     }
     
-    // Convert markdown-style formatting to HTML
+    // Clean and convert markdown-style formatting to HTML
     let formatted = content
-        // Bold text - handle both ** and *
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Remove reference numbers like [1], [2], etc.
+        // First remove reference numbers
         .replace(/\[\d+\]/g, '')
-        // Italic text (single asterisk)
+        // Convert bold markdown to HTML
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Convert italic markdown to HTML (single asterisk)
         .replace(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g, '<em>$1</em>')
         // Line breaks
         .replace(/\n/g, '<br>')
         // Bullet points
-        .replace(/^- (.*$)/gim, '• $1');
+        .replace(/^- (.*$)/gim, '• $1')
+        // Clean up any remaining double asterisks that weren't matched
+        .replace(/\*\*/g, '');
     
     return formatted;
 }
@@ -273,6 +275,9 @@ function createShowMoreContent(content, maxHeight = 200) {
 }
 
 function formatStrainDataAsCards(content) {
+    // Clean the content first
+    content = cleanMarkdown(content);
+    
     const strainData = parseStrainData(content);
     
     return `
@@ -449,11 +454,15 @@ function cleanMarkdown(text) {
     if (!text) return text;
     return text
         .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold markdown
-        .replace(/\[\d+\]/g, '')           // Remove reference numbers
-        .replace(/\*([^*]+)\*/g, '$1');    // Remove italic markdown
+        .replace(/\[\d+\]/g, '')           // Remove reference numbers like [1], [2], etc.
+        .replace(/\*([^*]+)\*/g, '$1')     // Remove italic markdown
+        .trim();                           // Remove extra whitespace
 }
 
 function parseStrainData(content) {
+    // First, clean the entire content
+    content = cleanMarkdown(content);
+    
     const data = {
         name: '',
         altNames: [],
@@ -471,57 +480,62 @@ function parseStrainData(content) {
         rating: {}
     };
 
-    // Extract strain name
-    const nameMatch = content.match(/Strain Name:\s*(.+)/);
-    if (nameMatch) data.name = cleanMarkdown(nameMatch[1].trim());
+    // Extract strain name - handle both "Strain Name:" and "Name:" formats
+    const nameMatch = content.match(/(?:Strain )?Name:\s*(.+)/i);
+    if (nameMatch) data.name = nameMatch[1].trim();
 
     // Extract alt names
     const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/);
     if (altNamesMatch) {
-        data.altNames = altNamesMatch[1].split(',').map(name => cleanMarkdown(name.trim())).filter(name => name);
+        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'None widely noted beyond "White Widow"');
     }
 
     // Extract nicknames
     const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/);
     if (nicknamesMatch) {
-        data.nicknames = nicknamesMatch[1].split(',').map(name => cleanMarkdown(name.trim())).filter(name => name);
+        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
     }
 
     // Extract hybridization
     const hybridMatch = content.match(/Hybridization:\s*(.+)/);
-    if (hybridMatch) data.hybridization = cleanMarkdown(hybridMatch[1].trim());
+    if (hybridMatch) data.hybridization = hybridMatch[1].trim();
 
     // Extract flavors
     const flavorsMatch = content.match(/Reported Flavors \(Top 3\):\s*((?:(?!Reported Effects).)+)/s);
     if (flavorsMatch) {
         const flavorsText = flavorsMatch[1].trim();
-        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => cleanMarkdown(flavor.trim())).filter(flavor => flavor);
+        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => flavor.trim()).filter(flavor => flavor);
     }
 
     // Extract effects
     const effectsMatch = content.match(/Reported Effects \(Top 3\):\s*((?:(?!Physical Characteristics|Availability by State).)+)/s);
     if (effectsMatch) {
         const effectsText = effectsMatch[1].trim();
-        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => cleanMarkdown(effect.trim())).filter(effect => effect);
+        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => effect.trim()).filter(effect => effect);
     }
 
     // Extract physical characteristics
-    const physicalMatch = content.match(/Physical Characteristics \(Color, Bud Structure, Trichomes\):\s*((?:(?!Original Release Date|History).)+)/s);
+    const physicalMatch = content.match(/Physical Characteristics[^:]*:\s*((?:(?!Original Release Date|History|Lineage|Similar Strains).)+)/si);
     if (physicalMatch) {
         const physicalText = physicalMatch[1].trim();
-        // Store the raw text for image generation
         currentPhysicalCharacteristics = physicalText;
-        // Continue with existing parsing...
-        const lines = physicalText.split(/[-•]\s*/).slice(1);
-        lines.forEach(line => {
-            if (line.toLowerCase().includes('color')) {
-                data.physicalCharacteristics.color = line.trim();
-            } else if (line.toLowerCase().includes('bud') || line.toLowerCase().includes('structure')) {
-                data.physicalCharacteristics.budStructure = line.trim();
-            } else if (line.toLowerCase().includes('trichome')) {
-                data.physicalCharacteristics.trichomes = line.trim();
-            }
-        });
+        
+        // Parse bud structure specifically
+        const budMatch = physicalText.match(/Bud Structure:\s*([^.]+)/i);
+        if (budMatch) {
+            data.physicalCharacteristics.budStructure = budMatch[1].trim();
+        }
+        
+        // Look for other characteristics in the text
+        if (physicalText.includes('Color:')) {
+            const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
+            if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
+        }
+        
+        if (physicalText.includes('Trichome')) {
+            const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
+            if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
+        }
     }
 
     // Extract release date
