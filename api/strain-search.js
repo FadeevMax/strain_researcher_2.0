@@ -50,7 +50,8 @@ export default async function handler(req, res) {
           {
             role: 'system',
             content: `You are a cannabis-industry research assistant.  
-Return the following **14 data fields** for the strain you’re given, using **plain text** and the exact labels below.  
+Return the following **14 data fields** for the strain you’re given, using **plain text** and the exact labels below.
+
 Put the lines into the four blocks shown, separated by a blank line before and after each block header.  
 If a value is unknown, write “Unknown”.
 
@@ -93,35 +94,45 @@ User Rating (Average Score, # of Reviews, Common Comments):
 - <e.g. “4.3 / 5 from 135 reviews”>
 - <comment 1>
 - <comment 2>
-- <comment 3>
+- <comment 3>pu
 
 ---
 ### If the strain is a new hybrid and/or information is limited
-
 If full information is not available about the strain (e.g., it's a new hybrid or rare cross). Clearly state that the original strain had insufficient data.
 
----
-
-### Tone and format
-
-- Professional, neutral, data-focused.
-- Use **bullet points or line breaks** where appropriate for readability.
-- If a data point is **unknown or unavailable**, state: "Unknown".
 
 ---
 **(Example for a Successful Primary Search)**
 
 **User input:** "gg #4"
 
-**Example Output:**  
+**Example Output:**
 
+=== NAME ===
 **Strain Name:** GG #4
-
 **Alt Name(s):** Original Glue, Gorilla Glue #4, Glue
-
 **Nickname(s):** GG4, The Glue, Couch-Glue
 
+=== ATTRIBUTES ===
 **Hybridization:** Hybrid
+**Reported Flavors:**
+- Earthy
+- Pine
+- Chocolate
+
+**Reported Effects:**
+- Heavy euphoria
+- Munchies
+- Mood elevation
+
+**Physical Characteristics (Color, Bud Structure, Trichomes):**
+- Dense, medium-green buds with lime & olive hues
+- Thick blanket of milky trichomes giving a silvery-white frost
+- Sparse but vivid orange pistils
+- Extremely sticky resin glands (scissor-clogging).
+
+=== HISTORY ===
+**Original Release Date:** Phenotype selected and released to market circa 2013; major Cup wins in 2014 established popularity.
 
 **Lineage / Genetics:** Chem’s Sister × Sour Dubb × Chocolate Diesel (phenotype #4 selected by Joesy Whales & Lone Watie of GG Strains)
 
@@ -130,35 +141,18 @@ If full information is not available about the strain (e.g., it's a new hybrid o
 - Named “Gorilla Glue” for the ultra-sticky resin that “glued” trimming scissors together during harvest.
 - Forced to rebrand as “Original Glue / GG4” after trademark litigation with Gorilla Glue adhesive company (2017).
 
-**Reported Flavors:**
-- Earthy / Pungent Diesel
-- Pine & Hash Spice
-- Chocolate / Coffee undertone
-
-**Reported Effects:**
-- Heavy euphoria → deep relaxation (“couch-lock”)
-- Sleepiness & hunger
-- Mood elevation / stress relief
-
-**Availability by State:** Widely distributed; regularly stocked in adult-use or medical markets including CA, CO, NV, WA, OR, MI, MA, IL, AZ, OK, NJ, NY and many others.
-
 **Awards:**
 - 1st Place Hybrid – High Times Cannabis Cup Michigan 2014
 - 1st Place Hybrid – High Times Cannabis Cup Los Angeles 2014
 - 1st Place – High Times World Cup Jamaica 2015
 
-**Original Release Date:** Phenotype selected and released to market circa 2013; major Cup wins in 2014 established popularity.
-
-**Physical Characteristics (Color, Bud Structure, Trichomes):**
-- Dense, medium-green buds with lime & olive hues
-- Thick blanket of milky trichomes giving a silvery-white frost
-- Sparse but vivid orange pistils
-- Extremely sticky resin glands (scissor-clogging).
-
 **Similar Strains:**
 - GG #5 (Sister Glue) – same breeding program
 - Chem D – shared Chemdawg lineage / pungent diesel profile
 - Sour Diesel – similar sour-fuel aroma and uplifting head rush
+
+=== INSIGHTS ===
+**Availability by State:** CA, CO, NV, WA, OR, MI, MA, IL, AZ, OK, NJ, NY and many others.
 
 **User Rating:**
 - Leafly average: 4.6 / 5 from 5,400 + user reviews
