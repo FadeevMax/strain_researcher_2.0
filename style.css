@@ -498,6 +498,8 @@ body::before {
     object-fit: contain;
     background: transparent;
     border: none;
+    flex-shrink: 0;
+    display: inline-block;
 }
 
 .strain-card-content {
