@@ -11,6 +11,7 @@ const loadingOverlay = document.getElementById('loading-overlay');
 // Chat state
 let isTyping = false;
 let conversationHistory = [];
+let rawResponse = ''; // Store raw markdown response from Perplexity
 
 // Add after the existing global variables
 let isResultsView = false;
@@ -59,23 +60,54 @@ function toggleResultsView(show) {
         mainContent.classList.add('results-view');
         chatContainer.classList.add('results-view');
         
-        // Add new search button if it doesn't exist
-        if (!document.querySelector('.new-search-btn')) {
+        // Add new search button and response buttons if they don't exist
+        if (!document.querySelector('.header-buttons')) {
+            const headerButtons = document.createElement('div');
+            headerButtons.className = 'header-buttons';
+            
             const newSearchBtn = document.createElement('button');
             newSearchBtn.className = 'new-search-btn';
             newSearchBtn.textContent = 'New Search';
             newSearchBtn.addEventListener('click', resetToSearch);
-            header.appendChild(newSearchBtn);
+            
+            const responseButtons = document.createElement('div');
+            responseButtons.className = 'response-buttons';
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'response-btn download-btn';
+            downloadBtn.title = 'Download Raw Response';
+            downloadBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+            downloadBtn.onclick = downloadRawResponse;
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'response-btn copy-btn';
+            copyBtn.title = 'Copy Raw Response';
+            copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+            copyBtn.onclick = copyRawResponse;
+            
+            responseButtons.appendChild(downloadBtn);
+            responseButtons.appendChild(copyBtn);
+            
+            headerButtons.appendChild(newSearchBtn);
+            headerButtons.appendChild(responseButtons);
+            header.appendChild(headerButtons);
         }
     } else {
         header.classList.remove('results-view');
         mainContent.classList.remove('results-view');
         chatContainer.classList.remove('results-view');
         
-        // Remove new search button
-        const newSearchBtn = document.querySelector('.new-search-btn');
-        if (newSearchBtn) {
-            newSearchBtn.remove();
+        // Remove header buttons
+        const headerButtons = document.querySelector('.header-buttons');
+        if (headerButtons) {
+            headerButtons.remove();
         }
         
         // Show search elements again
@@ -151,6 +183,9 @@ async function searchStrain(query) {
         // NOW switch to results view after getting the response
         toggleResultsView(true);
 
+        // Store raw response before formatting
+        rawResponse = data.response;
+        
         // Add bot response
         addMessage(data.response, 'bot');
         
@@ -821,4 +856,67 @@ User Rating (Average Score, # of Reviews, Common Comments):
 - Common comments include praise for its fast-acting cerebral high, distinctive diesel aroma, and effectiveness for stress, depression, and anxiety relief`;
     
     return formatBotMessage(sampleStrainData);
+}
+
+// Download and Copy Functions for Raw Response
+function downloadRawResponse() {
+    if (!rawResponse) {
+        alert('No response data available to download.');
+        return;
+    }
+    
+    const blob = new Blob([rawResponse], { type: 'text/markdown' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `strain-response-${timestamp}.md`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    // Visual feedback
+    const btn = document.querySelector('.download-btn');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+    }, 2000);
+}
+
+async function copyRawResponse() {
+    if (!rawResponse) {
+        alert('No response data available to copy.');
+        return;
+    }
+    
+    try {
+        await navigator.clipboard.writeText(rawResponse);
+        
+        // Visual feedback
+        const btn = document.querySelector('.copy-btn');
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+        }, 2000);
+    } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = rawResponse;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        alert('Response copied to clipboard!');
+    }
 }
