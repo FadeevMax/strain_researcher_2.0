@@ -407,8 +407,9 @@ body::before {
     gap: 8px;
     align-items: center;
     position: absolute;
-    top: -16px;
-    right: -16px;
+    top: -50px;
+    right: 50%;
+    transform: translateX(25%);
     z-index: 10;
 }
 
@@ -539,10 +540,6 @@ li {
     transform: translateY(-4px);
     border-color: #666666;  /* Lighter border on hover */
     box-shadow: 0 8px 30px rgba(255, 255, 255, 0.05);  /* Subtle glow on hover */
-}
-
-.strain-card:nth-child(2) {
-    position: relative;
 }
 
 .strain-card-header {
