@@ -479,6 +479,25 @@ body::before {
     margin-bottom: 20px;
 }
 
+ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0;
+    color: #ffffff;
+}
+li {
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+.trivia-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+.trivia-list li:before {
+    content: '• ';
+    color: #a1a1a1;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

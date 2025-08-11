@@ -381,12 +381,12 @@ function formatStrainDataAsCards(content) {
                         <div class="strain-field">
                             <h5>Physical Characteristics</h5>
                             <div class="physical-chars">
-                                ${strainData.physicalCharacteristics.description ? 
-                                    `<p>${strainData.physicalCharacteristics.description}</p>` : 
+                                ${strainData.physicalCharacteristics.bullets ? 
+                                    `<ul>${strainData.physicalCharacteristics.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` :
+                                    (strainData.physicalCharacteristics.description ? `<p>${strainData.physicalCharacteristics.description}</p>` : 
                                     `${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
                                     ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
-                                    ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`
-                                }
+                                    ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`)}
                             </div>
                         </div>
                     ` : ''}
@@ -414,10 +414,12 @@ function formatStrainDataAsCards(content) {
                             <p>${strainData.lineage}</p>
                         </div>
                     ` : ''}
-                    ${strainData.trivia ? `
+                    ${strainData.trivia.length > 0 ? `
                         <div class="strain-field">
                             <h5>Trivia (Interesting Facts)</h5>
-                            <p>${strainData.trivia}</p>
+                            <ul class="trivia-list">
+                                ${strainData.trivia.map(fact => `<li>${fact}</li>`).join('')}
+                            </ul>
                         </div>
                     ` : ''}
                     ${strainData.awards ? `
@@ -468,7 +470,7 @@ function formatStrainDataAsCards(content) {
                                 ${strainData.rating.commonComments ? `
                                     <div class="common-comments">
                                         <h6>Common Comments</h6>
-                                        ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>"${comment}"</div>`).join('')}
+                                        ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>${comment}</div>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>
@@ -513,7 +515,7 @@ function parseStrainData(content) {
         physicalCharacteristics: {},
         releaseDate: '',
         lineage: '',
-        trivia: '',
+        trivia: [],
         awards: [],
         similarStrains: [],
         availability: [],
@@ -527,13 +529,13 @@ function parseStrainData(content) {
     // Extract alt names
     const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/);
     if (altNamesMatch) {
-        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'None widely noted beyond "White Widow"');
+        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'Unknown');
     }
 
     // Extract nicknames
     const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/);
     if (nicknamesMatch) {
-        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
+        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'Unknown');
     }
 
     // Extract hybridization
@@ -544,14 +546,14 @@ function parseStrainData(content) {
     const flavorsMatch = content.match(/Reported Flavors \(Top 3\):\s*((?:(?!Reported Effects).)+)/s);
     if (flavorsMatch) {
         const flavorsText = flavorsMatch[1].trim();
-        data.flavors = flavorsText.split(/[-•]\s*/).slice(1).map(flavor => flavor.trim()).filter(flavor => flavor);
+        data.flavors = flavorsText.split(/[-•]\s+/).filter(flavor => flavor.trim()).map(flavor => flavor.trim());
     }
 
     // Extract effects
     const effectsMatch = content.match(/Reported Effects \(Top 3\):\s*((?:(?!Physical Characteristics|Availability by State).)+)/s);
     if (effectsMatch) {
         const effectsText = effectsMatch[1].trim();
-        data.effects = effectsText.split(/[-•]\s*/).slice(1).map(effect => effect.trim()).filter(effect => effect);
+        data.effects = effectsText.split(/[-•]\s+/).filter(effect => effect.trim()).map(effect => effect.trim());
     }
 
     // Extract physical characteristics - more flexible parsing
@@ -560,26 +562,22 @@ function parseStrainData(content) {
         const physicalText = physicalMatch[1].trim();
         currentPhysicalCharacteristics = physicalText;
         
-        // If the whole text doesn't have specific labels, treat it as a general description
-        if (!physicalText.includes('Color:') && !physicalText.includes('Bud Structure:') && !physicalText.includes('Trichome')) {
-            // Store the entire description as bud structure if no specific categories found
+        // Split into bullets if present, else treat as description
+        const physicalBullets = physicalText.split(/[-•]\s+/).filter(b => b.trim()).map(b => b.trim());
+        if (physicalBullets.length > 1) {
+            data.physicalCharacteristics.bullets = physicalBullets;
+        } else if (!physicalText.includes('Color:') && !physicalText.includes('Bud Structure:') && !physicalText.includes('Trichome')) {
             data.physicalCharacteristics.description = physicalText;
         } else {
             // Parse specific characteristics if they exist
             const budMatch = physicalText.match(/Bud Structure:\s*([^.]+)/i);
-            if (budMatch) {
-                data.physicalCharacteristics.budStructure = budMatch[1].trim();
-            }
+            if (budMatch) data.physicalCharacteristics.budStructure = budMatch[1].trim();
             
-            if (physicalText.includes('Color:')) {
-                const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
-                if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
-            }
+            const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
+            if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
             
-            if (physicalText.includes('Trichome')) {
-                const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
-                if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
-            }
+            const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
+            if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
         }
     }
 
@@ -591,55 +589,54 @@ function parseStrainData(content) {
     const lineageMatch = content.match(/Lineage \/ Genetics:\s*(.+)/);
     if (lineageMatch) data.lineage = lineageMatch[1].trim();
 
-    // Extract trivia
+    // Extract trivia - parse into array
     const triviaMatch = content.match(/Trivia \(Interesting Facts\):\s*((?:(?!Awards).)+)/s);
     if (triviaMatch) {
-        data.trivia = triviaMatch[1].trim().replace(/[-•]\s*/g, '').trim();
+        const triviaText = triviaMatch[1].trim();
+        data.trivia = triviaText.split(/[-•]\s+/).filter(t => t.trim()).map(t => t.trim());
     }
 
-    // Extract awards
+    // Extract awards - handle comma or bullets
     const awardsMatch = content.match(/Awards:\s*(.+)/);
     if (awardsMatch) {
         const awardsText = awardsMatch[1].trim();
         if (!awardsText.toLowerCase().includes('unknown')) {
-            data.awards = awardsText.split(',').map(award => award.trim()).filter(award => award);
+            data.awards = awardsText.split(/,|\n[-•]\s*/).map(award => award.trim()).filter(award => award);
         }
     }
 
     // Extract similar strains
-    const similarMatch = content.match(
-        /Similar Strains \(Top 3 by effect\/genetics\):\s*([\s\S]*?)(?=\n(?:Availability by State|User Rating|Insights|===|\w.*?:)|$)/
-    );
+    const similarMatch = content.match(/Similar Strains \(Top 3 by effect\/genetics\):\s*([\s\S]*?)(?=\n(?:Availability by State|User Rating|Insights|===|\w.*?:)|$)/);
     if (similarMatch) {
         const similarText = similarMatch[1].trim();
-        data.similarStrains = similarText.split(/[-•]\s*/).slice(1).map(strain => strain.trim()).filter(strain => strain);
+        data.similarStrains = similarText.split(/[-•]\s+/).filter(s => s.trim()).map(s => s.trim());
     }
 
-    // Extract availability
+    // Extract availability - filter to state-like items
     const availabilityMatch = content.match(/Availability by State:\s*(.+)/);
     if (availabilityMatch) {
         const availabilityText = availabilityMatch[1].trim();
-        data.availability = availabilityText.split(',').map(state => state.trim()).filter(state => state);
+        const items = availabilityText.split(',').map(state => state.trim()).filter(state => state);
+        data.availability = items.filter(item => item.length <= 20 && !item.toLowerCase().includes('widely') && !item.toLowerCase().includes('including') && !item.toLowerCase().includes('others')); // Filter out prose
     }
 
-    // Extract user rating
+    // Extract user rating - more robust line-based parsing
     const ratingMatch = content.match(/User Rating \(Average Score, # of Reviews, Common Comments\):\s*((?:.|\n)+)/);
     if (ratingMatch) {
         const ratingText = ratingMatch[1].trim();
+        const lines = ratingText.split('\n').filter(l => l.trim()).map(l => l.replace(/[-•]\s*/,'').trim());
         
-        // Extract score
-        const scoreMatch = ratingText.match(/(\d+\.?\d*)/);
-        if (scoreMatch) data.rating.score = parseFloat(scoreMatch[1]);
-        
-        // Extract review count
-        const reviewMatch = ratingText.match(/(\d{1,3}(?:,\d{3})*|\d+)/);
-        if (reviewMatch) data.rating.reviews = reviewMatch[1].replace(/,/g, '');
-        
-        // Extract common comments
-        const commentsMatch = ratingText.match(/Common comments include (.+)/);
-        if (commentsMatch) {
-            data.rating.commonComments = commentsMatch[1].split(',').map(comment => comment.trim()).filter(comment => comment);
+        // First line is score/reviews
+        if (lines[0]) {
+            const scoreMatch = lines[0].match(/(\d+\.?\d*)\s*\/\s*5/);
+            if (scoreMatch) data.rating.score = parseFloat(scoreMatch[1]);
+            
+            const reviewMatch = lines[0].match(/\((\d{1,3}(?:,\d{3})*|\d+\+?)\s*(?:reviews?)?\)/i);
+            if (reviewMatch) data.rating.reviews = reviewMatch[1].replace(/,/g, '');
         }
+        
+        // Remaining lines are comments
+        data.rating.commonComments = lines.slice(1).map(comment => comment.replace(/["“”]/g, '').trim()).filter(c => c);
     }
 
     // Remove any trailing " ===" accidentally captured
