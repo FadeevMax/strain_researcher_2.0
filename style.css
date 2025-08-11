@@ -402,14 +402,14 @@ body::before {
     gap: 16px;
 }
 
-/* Remove the problematic positioning and place buttons correctly */
+/* Position response buttons within strain-dashboard */
 .response-buttons {
     display: flex;
     gap: 8px;
     align-items: center;
-    position: absolute;
-    top: -50px;  /* Position above the strain-dashboard blocks */
-    right: 0;    /* Align with right edge */
+    justify-content: center;
+    margin: 20px 0;  /* Space above and below buttons */
+    order: 1;  /* Position before second strain-card */
     z-index: 10;
 }
 
