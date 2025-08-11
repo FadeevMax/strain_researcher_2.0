@@ -402,14 +402,14 @@ body::before {
     gap: 16px;
 }
 
+/* Remove the problematic positioning and place buttons correctly */
 .response-buttons {
     display: flex;
     gap: 8px;
     align-items: center;
     position: absolute;
-    top: -50px;
-    right: 50%;
-    transform: translateX(25%);
+    top: -50px;  /* Position above the strain-dashboard blocks */
+    right: 0;    /* Align with right edge */
     z-index: 10;
 }
 
