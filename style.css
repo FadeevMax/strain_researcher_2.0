@@ -50,14 +50,14 @@ body::before {
 .logo {
     width: 132px;
     height: 132px;
-    border-radius: 50%;
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0; /* Remove rounded corners */
+    box-shadow: none; /* Remove shadow/black circle */
+    transition: transform 0.3s ease;
 }
 
 .logo:hover {
     transform: scale(1.05);
-    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+    box-shadow: none; /* Remove hover shadow too */
 }
 
 /* Main content */
@@ -406,6 +406,10 @@ body::before {
     display: flex;
     gap: 8px;
     align-items: center;
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 10;
 }
 
 /* Response action buttons */
@@ -518,6 +522,7 @@ li {
     margin: 40px auto;
     padding: 0 20px;
     background: transparent;  /* Add this line to ensure no background */
+    position: relative; /* Add this line */
 }
 
 .strain-card {
