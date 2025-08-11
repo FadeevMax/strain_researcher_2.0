@@ -402,15 +402,27 @@ body::before {
     gap: 16px;
 }
 
-/* Position response buttons within strain-dashboard */
+/* Wrapper for the entire strain content */
+.strain-content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Container for response buttons */
+.response-buttons-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+/* Response buttons styling */
 .response-buttons {
     display: flex;
     gap: 8px;
     align-items: center;
-    justify-content: center;
-    margin: 20px 0;  /* Space above and below buttons */
-    order: 1;  /* Position before second strain-card */
-    z-index: 10;
 }
 
 /* Response action buttons */
@@ -514,16 +526,17 @@ li {
 }
 
 /* Replace the entire .strain-dashboard section with: */
+/* Keep the strain-dashboard as it was */
 .strain-dashboard {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     width: 100%;
     max-width: 1200px;
-    margin: 40px auto;
+    margin: 0 auto;
     padding: 0 20px;
-    background: transparent;  /* Add this line to ensure no background */
-    position: relative; /* Add this line */
+    background: transparent;
+    position: relative;
 }
 
 .strain-card {
