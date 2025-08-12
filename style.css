@@ -402,22 +402,32 @@ body::before {
     gap: 16px;
 }
 
-/* Wrapper for the entire strain content */
+/* The issue is that absolutely positioned elements inside complex containers need explicit width/positioning */
+
+/* Fix 1: Make the strain-content-wrapper establish a clear positioning context */
 .strain-content-wrapper {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative; /* This is crucial for absolute positioning */
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    /* Add these to ensure proper positioning context */
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
 }
 
-/* Container for response buttons - FIXED POSITIONING */
+/* Fix 2: Use left/right positioning instead of just right */
 .response-buttons-container {
-    position: absolute; /* Changed from flex to absolute */
-    top: 0;
-    right: 20px;
-    z-index: 10; /* Ensure buttons appear above other content */
-    margin-bottom: 0; /* Remove margin since we're using absolute positioning */
-    padding: 0; /* Remove padding */
+    position: absolute !important;
+    top: 10px !important;
+    right: 20px !important;
+    left: auto !important; /* Explicitly set left to auto */
+    z-index: 1000 !important; /* Higher z-index */
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Add width constraint so it doesn't interfere */
+    width: auto !important;
+    height: auto !important;
 }
 
 /* Response buttons styling - keep existing styles */
@@ -457,6 +467,37 @@ body::before {
     width: 16px;
     height: 16px;
     stroke: currentColor;
+}
+
+/* Alternative Fix: If absolute positioning still doesn't work, 
+   use a different approach with CSS Grid */
+.strain-content-wrapper-alt {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+}
+
+.response-buttons-container-alt {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+    padding: 10px 20px 0 0;
+    z-index: 10;
+}
+
+.strain-dashboard-alt {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 0 20px;
+    margin-top: 10px;
 }
 
 /* Footer */
@@ -883,15 +924,16 @@ li {
 }
 
 /* Update responsive styles */
-/* Responsive adjustment for mobile */
+/* For mobile responsiveness */
 @media (max-width: 768px) {
     .response-buttons-container {
-        right: 10px; /* Adjust for smaller screens */
+        right: 10px !important;
+        top: 5px !important;
     }
     
     .strain-dashboard {
         grid-template-columns: 1fr;
-        margin-top: 60px; /* More space on mobile */
+        margin-top: 60px !important; /* More space for buttons */
     }
 }
 
