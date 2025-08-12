@@ -407,18 +407,20 @@ body::before {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    position: relative;
+    position: relative; /* This is crucial for absolute positioning */
 }
 
-/* Container for response buttons */
+/* Container for response buttons - FIXED POSITIONING */
 .response-buttons-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-    padding: 0 20px;
+    position: absolute; /* Changed from flex to absolute */
+    top: 0;
+    right: 20px;
+    z-index: 10; /* Ensure buttons appear above other content */
+    margin-bottom: 0; /* Remove margin since we're using absolute positioning */
+    padding: 0; /* Remove padding */
 }
 
-/* Response buttons styling */
+/* Response buttons styling - keep existing styles */
 .response-buttons {
     display: flex;
     gap: 8px;
@@ -526,7 +528,7 @@ li {
 }
 
 /* Replace the entire .strain-dashboard section with: */
-/* Keep the strain-dashboard as it was */
+/* Keep the strain dashboard as-is */
 .strain-dashboard {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -537,6 +539,7 @@ li {
     padding: 0 20px;
     background: transparent;
     position: relative;
+    margin-top: 50px; /* Add top margin to prevent overlap with buttons */
 }
 
 .strain-card {
@@ -880,9 +883,15 @@ li {
 }
 
 /* Update responsive styles */
+/* Responsive adjustment for mobile */
 @media (max-width: 768px) {
+    .response-buttons-container {
+        right: 10px; /* Adjust for smaller screens */
+    }
+    
     .strain-dashboard {
         grid-template-columns: 1fr;
+        margin-top: 60px; /* More space on mobile */
     }
 }
 
