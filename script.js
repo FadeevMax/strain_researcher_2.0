@@ -74,40 +74,7 @@ function toggleResultsView(show) {
             header.appendChild(headerButtons);
         }
         
-        // Add response buttons to the strain-dashboard after it's created
-        // We need to wait for the dashboard to be added to DOM
-        setTimeout(() => {
-            const strainDashboard = document.querySelector('.strain-dashboard');
-            if (strainDashboard && !document.querySelector('.response-buttons')) {
-                const responseButtons = document.createElement('div');
-                responseButtons.className = 'response-buttons';
-                
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'response-btn download-btn';
-                downloadBtn.title = 'Download Raw Response';
-                downloadBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>`;
-                downloadBtn.onclick = downloadRawResponse;
-                
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'response-btn copy-btn';
-                copyBtn.title = 'Copy Raw Response';
-                copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
-                    <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>`;
-                copyBtn.onclick = copyRawResponse;
-                
-                responseButtons.appendChild(downloadBtn);
-                responseButtons.appendChild(copyBtn);
-                
-                // Append to strain-dashboard container, not header
-                strainDashboard.appendChild(responseButtons);
-            }
-        }, 100); // Small delay to ensure dashboard is rendered
+        // Remove the setTimeout block that was adding buttons - we don't need it anymore
         
     } else {
         header.classList.remove('results-view');
@@ -120,11 +87,6 @@ function toggleResultsView(show) {
             headerButtons.remove();
         }
         
-        // Remove response buttons
-        const responseButtons = document.querySelector('.response-buttons');
-        if (responseButtons) {
-            responseButtons.remove();
-        }
         
         // Show search elements again
         suggestionsContainer.style.display = 'block';
@@ -332,166 +294,185 @@ function formatStrainDataAsCards(content) {
     const strainData = parseStrainData(content);
     
     return `
-        <div class="strain-dashboard">
-            <!-- Name Card -->
-            <div class="strain-card">
-                <div class="strain-card-header">
-                    <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/clipart4589359.png" alt="Name icon">
-                        Name
-                    </h3>
-                </div>
-                <div class="strain-card-content">
-                    <h4 class="strain-name">${strainData.name}</h4>
-                    ${strainData.altNames ? `
-                        <div class="strain-field">
-                            <h5>Alternative Names</h5>
-                            <div class="strain-badges">
-                                ${strainData.altNames.map(name => `<span class="strain-badge secondary">${name}</span>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${strainData.nicknames ? `
-                        <div class="strain-field">
-                            <h5>Nicknames</h5>
-                            <div class="strain-badges">
-                                ${strainData.nicknames.map(name => `<span class="strain-badge outline">${name}</span>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
+        <div class="strain-content-wrapper">
+            <div class="response-buttons-container">
+                <div class="response-buttons">
+                    <button class="response-btn download-btn" title="Download Raw Response" onclick="downloadRawResponse()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="response-btn copy-btn" title="Copy Raw Response" onclick="copyRawResponse()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-
-            <!-- Attributes Card -->
-            <div class="strain-card">
-                <div class="strain-card-header">
-                    <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/star.png" alt="Attributes icon">
-                        Attributes
-                    </h3>
-                </div>
-                <div class="strain-card-content">
-                    ${strainData.hybridization ? `
-                        <div class="strain-field">
-                            <h5>Hybridization</h5>
-                            <p>${strainData.hybridization}</p>
-                        </div>
-                    ` : ''}
-                    ${strainData.flavors ? `
-                        <div class="strain-field">
-                            <h5>Top Flavors</h5>
-                            <div class="strain-badges">
-                                ${strainData.flavors.map(flavor => `<span class="strain-badge secondary">${flavor}</span>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${strainData.effects ? `
-                        <div class="strain-field">
-                            <h5>Top Effects</h5>
-                            <div class="strain-badges">
-                                ${strainData.effects.map(effect => `<span class="strain-badge outline">${effect}</span>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${(strainData.physicalCharacteristics && Object.keys(strainData.physicalCharacteristics).length > 0) ? `
-                        <div class="strain-field">
-                            <h5>Physical Characteristics</h5>
-                            <div class="physical-chars">
-                                ${strainData.physicalCharacteristics.bullets ? 
-                                    `<ul>${strainData.physicalCharacteristics.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` :
-                                    (strainData.physicalCharacteristics.description ? `<p>${strainData.physicalCharacteristics.description}</p>` : 
-                                    `${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
-                                    ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
-                                    ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`)}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <!-- History Card -->
-            <div class="strain-card">
-                <div class="strain-card-header">
-                    <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/14720179.png" alt="History icon">
-                        History
-                    </h3>
-                </div>
-                <div class="strain-card-content">
-                    ${strainData.releaseDate ? `
-                        <div class="strain-field">
-                            <h5>Original Release Date</h5>
-                            <p>${strainData.releaseDate}</p>
-                        </div>
-                    ` : ''}
-                    ${strainData.lineage ? `
-                        <div class="strain-field">
-                            <h5>Lineage / Genetics</h5>
-                            <p>${strainData.lineage}</p>
-                        </div>
-                    ` : ''}
-                    ${strainData.trivia.length > 0 ? `
-                        <div class="strain-field">
-                            <h5>Trivia (Interesting Facts)</h5>
-                            <ul class="trivia-list">
-                                ${strainData.trivia.map(fact => `<li>${fact}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    ${strainData.awards ? `
-                        <div class="strain-field">
-                            <h5>Awards</h5>
-                            <div class="awards-list">
-                                ${strainData.awards.map(award => `<div class="award-item"><span class="award-icon">🏆</span>${award}</div>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${strainData.similarStrains ? `
-                        <div class="strain-field">
-                            <h5>Similar Strains</h5>
-                            <div class="strain-badges">
-                                ${strainData.similarStrains.map(strain => `<span class="strain-badge secondary">${strain}</span>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <!-- Insights Card -->
-            <div class="strain-card">
-                <div class="strain-card-header">
-                    <h3 class="strain-card-title">
-                        <img class="card-icon" src="icons/icon_account_management.png" alt="Insights icon">
-                        Insights
-                    </h3>
-                </div>
-                <div class="strain-card-content">
-                    ${strainData.availability ? `
-                        <div class="strain-field">
-                            <h5>Availability by State</h5>
-                            <div class="availability-list">
-                                ${strainData.availability.map(state => `<div class="availability-item"><span class="location-icon">📍</span><span class="strain-badge outline">${state}</span></div>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${strainData.rating ? `
-                        <div class="strain-field">
-                            <h5>User Rating</h5>
-                            <div class="rating-info">
-                                <div class="rating-score">
-                                    <span class="star-icon">⭐</span>
-                                    <span class="score">${strainData.rating.score}</span>
-                                    <span class="review-count">(${strainData.rating.reviews} reviews)</span>
+            <div class="strain-dashboard">
+                <!-- Name Card -->
+                <div class="strain-card">
+                    <div class="strain-card-header">
+                        <h3 class="strain-card-title">
+                            <img class="card-icon" src="icons/clipart4589359.png" alt="Name icon">
+                            Name
+                        </h3>
+                    </div>
+                    <div class="strain-card-content">
+                        <h4 class="strain-name">${strainData.name}</h4>
+                        ${strainData.altNames ? `
+                            <div class="strain-field">
+                                <h5>Alternative Names</h5>
+                                <div class="strain-badges">
+                                    ${strainData.altNames.map(name => `<span class="strain-badge secondary">${name}</span>`).join('')}
                                 </div>
-                                ${strainData.rating.commonComments ? `
-                                    <div class="common-comments">
-                                        <h6>Common Comments</h6>
-                                        ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>${comment}</div>`).join('')}
-                                    </div>
-                                ` : ''}
                             </div>
-                        </div>
-                    ` : ''}
+                        ` : ''}
+                        ${strainData.nicknames ? `
+                            <div class="strain-field">
+                                <h5>Nicknames</h5>
+                                <div class="strain-badges">
+                                    ${strainData.nicknames.map(name => `<span class="strain-badge outline">${name}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Attributes Card -->
+                <div class="strain-card">
+                    <div class="strain-card-header">
+                        <h3 class="strain-card-title">
+                            <img class="card-icon" src="icons/star.png" alt="Attributes icon">
+                            Attributes
+                        </h3>
+                    </div>
+                    <div class="strain-card-content">
+                        ${strainData.hybridization ? `
+                            <div class="strain-field">
+                                <h5>Hybridization</h5>
+                                <p>${strainData.hybridization}</p>
+                            </div>
+                        ` : ''}
+                        ${strainData.flavors ? `
+                            <div class="strain-field">
+                                <h5>Top Flavors</h5>
+                                <div class="strain-badges">
+                                    ${strainData.flavors.map(flavor => `<span class="strain-badge secondary">${flavor}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${strainData.effects ? `
+                            <div class="strain-field">
+                                <h5>Top Effects</h5>
+                                <div class="strain-badges">
+                                    ${strainData.effects.map(effect => `<span class="strain-badge outline">${effect}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${(strainData.physicalCharacteristics && Object.keys(strainData.physicalCharacteristics).length > 0) ? `
+                            <div class="strain-field">
+                                <h5>Physical Characteristics</h5>
+                                <div class="physical-chars">
+                                    ${strainData.physicalCharacteristics.bullets ? 
+                                        `<ul>${strainData.physicalCharacteristics.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` :
+                                        (strainData.physicalCharacteristics.description ? `<p>${strainData.physicalCharacteristics.description}</p>` : 
+                                        `${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
+                                        ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
+                                        ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`)}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- History Card -->
+                <div class="strain-card">
+                    <div class="strain-card-header">
+                        <h3 class="strain-card-title">
+                            <img class="card-icon" src="icons/14720179.png" alt="History icon">
+                            History
+                        </h3>
+                    </div>
+                    <div class="strain-card-content">
+                        ${strainData.releaseDate ? `
+                            <div class="strain-field">
+                                <h5>Original Release Date</h5>
+                                <p>${strainData.releaseDate}</p>
+                            </div>
+                        ` : ''}
+                        ${strainData.lineage ? `
+                            <div class="strain-field">
+                                <h5>Lineage / Genetics</h5>
+                                <p>${strainData.lineage}</p>
+                            </div>
+                        ` : ''}
+                        ${strainData.trivia.length > 0 ? `
+                            <div class="strain-field">
+                                <h5>Trivia (Interesting Facts)</h5>
+                                <ul class="trivia-list">
+                                    ${strainData.trivia.map(fact => `<li>${fact}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${strainData.awards ? `
+                            <div class="strain-field">
+                                <h5>Awards</h5>
+                                <div class="awards-list">
+                                    ${strainData.awards.map(award => `<div class="award-item"><span class="award-icon">🏆</span>${award}</div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${strainData.similarStrains ? `
+                            <div class="strain-field">
+                                <h5>Similar Strains</h5>
+                                <div class="strain-badges">
+                                    ${strainData.similarStrains.map(strain => `<span class="strain-badge secondary">${strain}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Insights Card -->
+                <div class="strain-card">
+                    <div class="strain-card-header">
+                        <h3 class="strain-card-title">
+                            <img class="card-icon" src="icons/icon_account_management.png" alt="Insights icon">
+                            Insights
+                        </h3>
+                    </div>
+                    <div class="strain-card-content">
+                        ${strainData.availability ? `
+                            <div class="strain-field">
+                                <h5>Availability by State</h5>
+                                <div class="availability-list">
+                                    ${strainData.availability.map(state => `<div class="availability-item"><span class="location-icon">📍</span><span class="strain-badge outline">${state}</span></div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${strainData.rating ? `
+                            <div class="strain-field">
+                                <h5>User Rating</h5>
+                                <div class="rating-info">
+                                    <div class="rating-score">
+                                        <span class="star-icon">⭐</span>
+                                        <span class="score">${strainData.rating.score}</span>
+                                        <span class="review-count">(${strainData.rating.reviews} reviews)</span>
+                                    </div>
+                                    ${strainData.rating.commonComments ? `
+                                        <div class="common-comments">
+                                            <h6>Common Comments</h6>
+                                            ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>${comment}</div>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         </div>
