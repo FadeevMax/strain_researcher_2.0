@@ -460,6 +460,17 @@ body::before {
     transform: translateY(-1px);
 }
 
+.download-btn {
+    background: #4CAF50;
+    width: 96px;
+    border-color: #4CAF50;
+}
+
+.download-btn:hover {
+    background: #45a049;
+    border-color: #45a049;
+}
+
 .response-btn:active {
     transform: translateY(0);
 }
@@ -509,6 +520,12 @@ body::before {
     font-size: 14px;
     border-top: 1px solid #333333;
     margin-top: auto;
+}
+
+.footer p:first-child {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #888888;
 }
 
 /* Loading overlay */
