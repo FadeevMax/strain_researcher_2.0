@@ -373,11 +373,20 @@ body::before {
     margin: 0;
 }
 
+/* Update header logo styles for results view */
 .header.results-view .logo {
     width: 60px;
     height: 60px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
+.header.results-view .logo:hover {
+    transform: scale(1.1);
+}
+
+/* Remove or comment out these styles */
+/*
 .new-search-btn {
     background: #4CAF50;
     color: white;
@@ -394,12 +403,13 @@ body::before {
     background: #45a049;
     transform: translateY(-2px);
 }
+*/
 
-/* Header buttons container */
+/* Update header buttons positioning */
 .header-buttons {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
 }
 
 /* The issue is that absolutely positioned elements inside complex containers need explicit width/positioning */
@@ -416,18 +426,9 @@ body::before {
     transform: none !important;
 }
 
-/* Fix 2: Use left/right positioning instead of just right */
+/* Remove the response-buttons-container styles since they're moved to header */
 .response-buttons-container {
-    position: absolute !important;
-    top: 10px !important;
-    right: 20px !important;
-    left: auto !important; /* Explicitly set left to auto */
-    z-index: 1000 !important; /* Higher z-index */
-    margin: 0 !important;
-    padding: 0 !important;
-    /* Add width constraint so it doesn't interfere */
-    width: auto !important;
-    height: auto !important;
+    display: none !important;
 }
 
 /* Response buttons styling - keep existing styles */
