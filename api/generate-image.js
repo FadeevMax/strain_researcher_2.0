@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     // Create prompt based on physical characteristics
     const prompt = `Studio photograph of a single cannabis bud still on its stem. Based on these physical characteristics: ${physicalCharacteristics}. The bud is set against a COMPLETELY BLACK, non-reflective background. The focus is sharp on the trichomes and pistils. The lighting should ensure the edges of the bud are crisp and clear, with absolutely no white border, halo, or outline. There shouldn't be ANY white color on the image.`;
     
-    // Use OpenAI DALL-E API as the primary option
+    // Use apt-image-1 model instead of DALL-E
     const apiUrl = process.env.CUSTOM_IMAGE_API_URL || 'https://api.openai.com/v1/images/generations';
     
     console.log('Generating image with prompt:', prompt);
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: process.env.CUSTOM_IMAGE_MODEL || 'dall-e-3',
+        model: 'apt-image-1', // Changed to apt-image-1 model
         prompt: prompt,
         n: 1,
         size: '1024x1024',
