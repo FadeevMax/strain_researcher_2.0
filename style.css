@@ -883,8 +883,6 @@ li {
     margin: 40px auto;
     text-align: center;
     padding: 0 20px;
-    /* HIDDEN: Temporarily hide generate image functionality */
-    display: none !important;
 }
 
 .generate-image-btn {
