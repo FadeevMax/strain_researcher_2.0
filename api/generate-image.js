@@ -18,8 +18,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Physical characteristics are required' });
   }
   
-  // Check for API key (support both OpenAI and custom API keys)
-  const apiKey = process.env.GPT_IMAGE_API_KEY; // Vercel uses GPT_IMAGE_API_KEY
+  // Check for API key
+  const apiKey = process.env.GPT_IMAGE_API_KEY; // Ensure this is set in your environment
   if (!apiKey) {
     return res.status(500).json({ 
       error: 'API key not configured',
@@ -31,8 +31,8 @@ export default async function handler(req, res) {
     // Create prompt based on physical characteristics
     const prompt = `Studio photograph of a single cannabis bud still on its stem. Based on these physical characteristics: ${physicalCharacteristics}. The bud is set against a COMPLETELY BLACK, non-reflective background. The focus is sharp on the trichomes and pistils. The lighting should ensure the edges of the bud are crisp and clear, with absolutely no white border, halo, or outline. There shouldn't be ANY white color on the image.`;
     
-    // Use custom or OpenAI API URL
-    const apiUrl = process.env.CUSTOM_IMAGE_API_URL || 'https://api.openai.com/v1/images/generations';
+    // Define the API URL for OpenAI
+    const apiUrl = 'https://api.openai.com/v1/images/generations';
     
     console.log('Generating image with prompt:', prompt);
     
@@ -46,8 +46,7 @@ export default async function handler(req, res) {
         model: "gpt-image-1", // Ensure this is the correct model identifier
         prompt: prompt,
         size: "1024x1024",
-        quality: "hd",
-        response_format: "b64_json"
+        response_format: "b64_json" // Expect base64-encoded image
       })
     });
     
@@ -72,34 +71,12 @@ export default async function handler(req, res) {
     const data = await response.json();
     console.log('API Response keys:', Object.keys(data));
     
-    // Extract image data from response
+    // Check for valid image data
     if (data.data && data.data[0] && data.data[0].b64_json) {
       return res.status(200).json({
         success: true,
         image: data.data[0].b64_json
       });
-    }
-    
-    // If URL format instead of base64
-    if (data.data && data.data[0] && data.data[0].url) {
-      // Convert URL to base64
-      try {
-        const imageResponse = await fetch(data.data[0].url);
-        const arrayBuffer = await imageResponse.arrayBuffer();
-        const base64 = Buffer.from(arrayBuffer).toString('base64');
-        
-        return res.status(200).json({
-          success: true,
-          image: base64
-        });
-      } catch (urlError) {
-        console.error('Error converting URL to base64:', urlError);
-        return res.status(500).json({
-          error: 'Failed to process generated image',
-          details: urlError.message,
-          success: false
-        });
-      }
     }
     
     console.error('Unexpected API response format:', data);
