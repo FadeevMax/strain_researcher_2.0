@@ -98,8 +98,14 @@ User Rating (Average Score, # of Reviews, Common Comments):
 ### Rules
 - If full information is not available about the strain (e.g., it's a new hybrid or rare cross). Clearly state that the original strain had insufficient data.
 - If any of the values is unknown (for example, no Nicknames), skip this value and DO NOT SHOW this line.
-- For User Rating, if exact review count is unknown but described as "thousands", write "1000+ reviews". If "hundreds", write "100+ reviews". Always provide a specific number or estimate with "+" suffix.
-- If rating is a range (e.g., "4.3 to 4.6"), use the single best/average score (e.g., "4.5 / 5")
+### Rules for User Ratings
+- Provide the actual rating score if known (e.g., "4.2 / 5", "4.7 / 5")
+- For review counts:
+  - If exact number is known, use it: "from 5,432 reviews"
+  - If described as "thousands", estimate realistically: "from 3,000+ reviews" or "from 8,500+ reviews"
+  - If described as "hundreds", estimate: "from 200+ reviews" or "from 750+ reviews"
+  - If unknown, state "No rating data available"
+- Don't default to 4.5 / 5 and 1000+ reviews - provide actual or realistic varied numbers
 
 ---
 **(Example for a Successful Primary Search)**
@@ -141,7 +147,7 @@ Similar Strains (Top 3 by effect/genetics):
 === RECOGNITION ===
 Awards: 1st Place Cannabis Cup Amsterdam 1995
 User Rating (Average Score, # of Reviews, Common Comments):
-- 4.6 / 5 from 1000+ reviews
+- 4.6 / 5 from 2000+ reviews
 - Noted for balanced, potent effects
 - Popular for stress and anxiety relief
 - Appreciated for ease of growth
