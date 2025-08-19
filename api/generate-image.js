@@ -18,38 +18,60 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Physical characteristics are required' });
   }
   
-  if (!process.env.GPT_IMAGE_API_KEY) {
-    return res.status(500).json({ error: 'GPT-Image-1 API key not configured' });
+  // Check for API key (support both OpenAI and custom API keys)
+  const apiKey = process.env.OPENAI_API_KEY || process.env.GPT_IMAGE_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ 
+      error: 'API key not configured',
+      details: 'Please set OPENAI_API_KEY or GPT_IMAGE_API_KEY environment variable'
+    });
   }
   
   try {
     // Create prompt based on physical characteristics
     const prompt = `Studio photograph of a single cannabis bud still on its stem. Based on these physical characteristics: ${physicalCharacteristics}. The bud is set against a COMPLETELY BLACK, non-reflective background. The focus is sharp on the trichomes and pistils. The lighting should ensure the edges of the bud are crisp and clear, with absolutely no white border, halo, or outline. There shouldn't be ANY white color on the image.`;
     
-    // Use GPT-Image-1 API (Replace with actual API URL for GPT-Image-1)
-    const response = await fetch('https://api.gpt-image-1.com/v1/images/generations', {
+    // Use OpenAI DALL-E API as the primary option
+    const apiUrl = process.env.CUSTOM_IMAGE_API_URL || 'https://api.openai.com/v1/images/generations';
+    
+    console.log('Generating image with prompt:', prompt.substring(0, 100) + '...');
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GPT_IMAGE_API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-image-1', // Replace with the actual model name if different
+        model: process.env.CUSTOM_IMAGE_MODEL || 'dall-e-3',
         prompt: prompt,
         n: 1,
-        size: '1024x1024', // Adjust size based on GPT-Image-1's supported sizes
-        quality: 'hd', // Use the appropriate quality setting for GPT-Image-1
-        response_format: 'b64_json' // Assuming GPT-Image-1 returns the image in base64
+        size: '1024x1024',
+        quality: 'hd',
+        response_format: 'b64_json'
       })
     });
     
+    console.log('API Response status:', response.status);
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('GPT-Image-1 API error:', errorData);
-      throw new Error(`GPT-Image-1 API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { error: { message: 'Failed to parse error response' } };
+      }
+      console.error('Image API error:', errorData);
+      
+      return res.status(500).json({
+        error: 'Image generation failed',
+        details: `API returned ${response.status}: ${errorData.error?.message || 'Unknown error'}`,
+        success: false
+      });
     }
     
     const data = await response.json();
+    console.log('API Response keys:', Object.keys(data));
     
     // Extract image data from response
     if (data.data && data.data[0] && data.data[0].b64_json) {
@@ -59,7 +81,34 @@ export default async function handler(req, res) {
       });
     }
     
-    throw new Error('No image generated from GPT-Image-1 API');
+    // If URL format instead of base64
+    if (data.data && data.data[0] && data.data[0].url) {
+      // Convert URL to base64
+      try {
+        const imageResponse = await fetch(data.data[0].url);
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        
+        return res.status(200).json({
+          success: true,
+          image: base64
+        });
+      } catch (urlError) {
+        console.error('Error converting URL to base64:', urlError);
+        return res.status(500).json({
+          error: 'Failed to process generated image',
+          details: urlError.message,
+          success: false
+        });
+      }
+    }
+    
+    console.error('Unexpected API response format:', data);
+    return res.status(500).json({
+      error: 'Unexpected response format',
+      details: 'API did not return image in expected format',
+      success: false
+    });
     
   } catch (error) {
     console.error('Error generating image:', error);
