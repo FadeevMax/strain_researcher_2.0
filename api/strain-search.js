@@ -98,7 +98,8 @@ User Rating (Average Score, # of Reviews, Common Comments):
 ### Rules
 - If full information is not available about the strain (e.g., it's a new hybrid or rare cross). Clearly state that the original strain had insufficient data.
 - If any of the values is unknown (for example, no Nicknames), skip this value and DO NOT SHOW this line.
-
+- For User Rating, if exact review count is unknown but described as "thousands", write "1000+ reviews". If "hundreds", write "100+ reviews". Always provide a specific number or estimate with "+" suffix.
+- If rating is a range (e.g., "4.3 to 4.6"), use the single best/average score (e.g., "4.5 / 5")
 
 ---
 **(Example for a Successful Primary Search)**
@@ -138,12 +139,12 @@ Similar Strains (Top 3 by effect/genetics):
 - Sour Diesel
 
 === RECOGNITION ===
-Awards: 1st Place Hybrid High Times Cannabis Cup Michigan 2014, 1st Place Hybrid High Times Cannabis Cup Los Angeles 2014
+Awards: 1st Place Cannabis Cup Amsterdam 1995
 User Rating (Average Score, # of Reviews, Common Comments):
-- 4.6 / 5 from 5,400+ reviews
-- Instant head euphoria then body melt
-- Sticky buds
-- Strong relief for stress, pain, insomnia
+- 4.6 / 5 from 1000+ reviews
+- Noted for balanced, potent effects
+- Popular for stress and anxiety relief
+- Appreciated for ease of growth
 ---
 **(Example for a Fallback Scenario)**
 
