@@ -98,59 +98,62 @@ User Rating (Average Score, # of Reviews, Common Comments):
 ### Rules
 - If full information is not available about the strain (e.g., it's a new hybrid or rare cross). Clearly state that the original strain had insufficient data.
 - If any of the values is unknown (for example, no Nicknames), skip this value and DO NOT SHOW this line.
-### Rules for User Ratings
-- Provide the actual rating score if known (e.g., "4.2 / 5", "4.7 / 5")
-- For review counts:
-  - If exact number is known, use it: "from 5,432 reviews"
-  - If described as "thousands", estimate realistically: "from 3,000+ reviews" or "from 8,500+ reviews"
-  - If described as "hundreds", estimate: "from 200+ reviews" or "from 750+ reviews"
-  - If unknown, state "No rating data available"
-- Don't default to 4.5 / 5 and 1000+ reviews - provide actual or realistic varied numbers
+
 
 ---
 **(Example for a Successful Primary Search)**
+
 **User input:** "gg #4"
+
 **Example Output:**
 
 === NAME ===
-Strain Name: GG #4
-Alt Name(s): Original Glue, Gorilla Glue #4, Glue
-Nickname(s): GG4, The Glue, Couch-Glue
+**Strain Name:** GG #4
+**Alt Name(s):** Original Glue, Gorilla Glue #4, Glue
+**Nickname(s):** GG4, The Glue, Couch-Glue
 
 === ATTRIBUTES ===
-Hybridization: Hybrid
-Reported Flavors (Top 3):
+**Hybridization:** Hybrid
+**Reported Flavors:**
 - Earthy
 - Pine
 - Chocolate
-Reported Effects (Top 3):
+
+**Reported Effects:**
 - Heavy euphoria
 - Munchies
 - Mood elevation
-Physical Characteristics (Color, Bud Structure, Trichomes):
+
+**Physical Characteristics (Color, Bud Structure, Trichomes):**
 - Dense, medium-green buds with lime & olive hues
 - Thick blanket of milky trichomes giving a silvery-white frost
 - Sparse but vivid orange pistils
+- Extremely sticky resin glands (scissor-clogging).
 
 === HISTORY ===
-Original Release Date: 2013
-Lineage / Genetics: Chem's Sister × Sour Dubb × Chocolate Diesel
-Trivia (Interesting Facts):
-- Discovered accidentally when a hermaphroditic Chem's Sister pollinated Sour Dubb plants
-- Named "Gorilla Glue" for the ultra-sticky resin that "glued" trimming scissors together
-- Forced to rebrand as "Original Glue / GG4" after trademark litigation
-Similar Strains (Top 3 by effect/genetics):
-- GG #5 (Sister Glue)
-- Chem D
-- Sour Diesel
+**Original Release Date:** Phenotype selected and released to market circa 2013; major Cup wins in 2014 established popularity.
+
+**Lineage / Genetics:** Chem’s Sister × Sour Dubb × Chocolate Diesel (phenotype #4 selected by Joesy Whales & Lone Watie of GG Strains)
+
+**Trivia (Interesting Facts):**
+- Discovered accidentally when a hermaphroditic Chem’s Sister pollinated Sour Dubb plants; the keeper seed became phenotype #4—hence “#4” in the name.
+- Named “Gorilla Glue” for the ultra-sticky resin that “glued” trimming scissors together during harvest.
+- Forced to rebrand as “Original Glue / GG4” after trademark litigation with Gorilla Glue adhesive company (2017).
+
+**Similar Strains:**
+- GG #5 (Sister Glue) – same breeding program
+- Chem D – shared Chemdawg lineage / pungent diesel profile
+- Sour Diesel – similar sour-fuel aroma and uplifting head rush
 
 === RECOGNITION ===
-Awards: 1st Place Cannabis Cup Amsterdam 1995
-User Rating (Average Score, # of Reviews, Common Comments):
-- 4.6 / 5 from 2000+ reviews
-- Noted for balanced, potent effects
-- Popular for stress and anxiety relief
-- Appreciated for ease of growth
+**Awards:**
+- 1st Place Hybrid – High Times Cannabis Cup Michigan 2014
+- 1st Place Hybrid – High Times Cannabis Cup Los Angeles 2014
+- 1st Place – High Times World Cup Jamaica 2015
+**User Rating:**
+- Leafly average: 4.6 / 5 from 5,400 + user reviews
+- Common Reddit remarks: “instant head euphoria then body melt,” “sticky buds,” strong relief for stress, pain, insomnia; some note dry mouth & anxious onset at high doses.
+
 ---
 **(Example for a Fallback Scenario)**
 
