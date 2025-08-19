@@ -37,17 +37,17 @@ export default async function handler(req, res) {
     console.log('Generating image with prompt:', prompt);
     
     const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
+    method: 'POST',
+    headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "gpt-image-1", // Ensure this is the correct model identifier
+    },
+    body: JSON.stringify({
+        model: "gpt-image-1",  // Ensure this is the correct model identifier
         prompt: prompt,
-        size: "1024x1024",
-        response_format: "b64_json" // Expect base64-encoded image
-      })
+        size: "1024x1024",  // Specify the image size (if required by the model)
+        // Remove 'response_format' parameter
+    })
     });
     
     console.log('API Response status:', response.status);
