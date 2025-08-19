@@ -19,11 +19,11 @@ export default async function handler(req, res) {
   }
   
   // Check for API key (support both OpenAI and custom API keys)
-  const apiKey = process.env.OPENAI_API_KEY || process.env.GPT_IMAGE_API_KEY;
+  const apiKey = process.env.GPT_IMAGE_API_KEY; // Vercel uses GPT_IMAGE_API_KEY
   if (!apiKey) {
     return res.status(500).json({ 
       error: 'API key not configured',
-      details: 'Please set OPENAI_API_KEY or GPT_IMAGE_API_KEY environment variable'
+      details: 'Please set GPT_IMAGE_API_KEY environment variable'
     });
   }
   
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     // Create prompt based on physical characteristics
     const prompt = `Studio photograph of a single cannabis bud still on its stem. Based on these physical characteristics: ${physicalCharacteristics}. The bud is set against a COMPLETELY BLACK, non-reflective background. The focus is sharp on the trichomes and pistils. The lighting should ensure the edges of the bud are crisp and clear, with absolutely no white border, halo, or outline. There shouldn't be ANY white color on the image.`;
     
-    // Use apt-image-1 model instead of DALL-E
+    // Use custom or OpenAI API URL
     const apiUrl = process.env.CUSTOM_IMAGE_API_URL || 'https://api.openai.com/v1/images/generations';
     
     console.log('Generating image with prompt:', prompt);
@@ -43,12 +43,11 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-image-1', // Changed to apt-image-1 model
+        model: "gpt-image-1", // Ensure this is the correct model identifier
         prompt: prompt,
-        n: 1,
-        size: '1024x1024',
-        quality: 'hd',
-        response_format: 'b64_json'
+        size: "1024x1024",
+        quality: "hd",
+        response_format: "b64_json"
       })
     });
     
