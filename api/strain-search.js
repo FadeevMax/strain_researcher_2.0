@@ -102,58 +102,48 @@ User Rating (Average Score, # of Reviews, Common Comments):
 
 ---
 **(Example for a Successful Primary Search)**
-
 **User input:** "gg #4"
-
 **Example Output:**
 
 === NAME ===
-**Strain Name:** GG #4
-**Alt Name(s):** Original Glue, Gorilla Glue #4, Glue
-**Nickname(s):** GG4, The Glue, Couch-Glue
+Strain Name: GG #4
+Alt Name(s): Original Glue, Gorilla Glue #4, Glue
+Nickname(s): GG4, The Glue, Couch-Glue
 
 === ATTRIBUTES ===
-**Hybridization:** Hybrid
-**Reported Flavors:**
+Hybridization: Hybrid
+Reported Flavors (Top 3):
 - Earthy
 - Pine
 - Chocolate
-
-**Reported Effects:**
+Reported Effects (Top 3):
 - Heavy euphoria
 - Munchies
 - Mood elevation
-
-**Physical Characteristics (Color, Bud Structure, Trichomes):**
+Physical Characteristics (Color, Bud Structure, Trichomes):
 - Dense, medium-green buds with lime & olive hues
 - Thick blanket of milky trichomes giving a silvery-white frost
 - Sparse but vivid orange pistils
-- Extremely sticky resin glands (scissor-clogging).
 
 === HISTORY ===
-**Original Release Date:** Phenotype selected and released to market circa 2013; major Cup wins in 2014 established popularity.
-
-**Lineage / Genetics:** Chem’s Sister × Sour Dubb × Chocolate Diesel (phenotype #4 selected by Joesy Whales & Lone Watie of GG Strains)
-
-**Trivia (Interesting Facts):**
-- Discovered accidentally when a hermaphroditic Chem’s Sister pollinated Sour Dubb plants; the keeper seed became phenotype #4—hence “#4” in the name.
-- Named “Gorilla Glue” for the ultra-sticky resin that “glued” trimming scissors together during harvest.
-- Forced to rebrand as “Original Glue / GG4” after trademark litigation with Gorilla Glue adhesive company (2017).
-
-**Similar Strains:**
-- GG #5 (Sister Glue) – same breeding program
-- Chem D – shared Chemdawg lineage / pungent diesel profile
-- Sour Diesel – similar sour-fuel aroma and uplifting head rush
+Original Release Date: 2013
+Lineage / Genetics: Chem's Sister × Sour Dubb × Chocolate Diesel
+Trivia (Interesting Facts):
+- Discovered accidentally when a hermaphroditic Chem's Sister pollinated Sour Dubb plants
+- Named "Gorilla Glue" for the ultra-sticky resin that "glued" trimming scissors together
+- Forced to rebrand as "Original Glue / GG4" after trademark litigation
+Similar Strains (Top 3 by effect/genetics):
+- GG #5 (Sister Glue)
+- Chem D
+- Sour Diesel
 
 === RECOGNITION ===
-**Awards:**
-- 1st Place Hybrid – High Times Cannabis Cup Michigan 2014
-- 1st Place Hybrid – High Times Cannabis Cup Los Angeles 2014
-- 1st Place – High Times World Cup Jamaica 2015
-**User Rating:**
-- Leafly average: 4.6 / 5 from 5,400 + user reviews
-- Common Reddit remarks: “instant head euphoria then body melt,” “sticky buds,” strong relief for stress, pain, insomnia; some note dry mouth & anxious onset at high doses.
-
+Awards: 1st Place Hybrid High Times Cannabis Cup Michigan 2014, 1st Place Hybrid High Times Cannabis Cup Los Angeles 2014
+User Rating (Average Score, # of Reviews, Common Comments):
+- 4.6 / 5 from 5,400+ reviews
+- Instant head euphoria then body melt
+- Sticky buds
+- Strong relief for stress, pain, insomnia
 ---
 **(Example for a Fallback Scenario)**
 

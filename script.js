@@ -495,10 +495,16 @@ function cleanMarkdown(text) {
     return text
         // Strip block headers like "=== HISTORY ==="
         .replace(/^\s*===.*?===\s*$/gm, '')
-        .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold markdown
-        .replace(/\[\d+\]/g, '')           // Remove reference numbers like [1], [2], etc.
-        .replace(/\*([^*]+)\*/g, '$1')     // Remove italic markdown
-        .trim();                           // Remove extra whitespace
+        // Remove bold markdown more aggressively
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        // Remove reference numbers
+        .replace(/\[\d+\]/g, '')
+        // Remove sources/references section
+        .replace(/Sources?:\s*\[\d+\].*$/gm, '')
+        .replace(/References?:\s*\[\d+\].*$/gm, '')
+        // Remove italic markdown
+        .replace(/\*([^*]+)\*/g, '$1')
+        .trim();
 }
 
 function parseStrainData(content) {
@@ -541,18 +547,37 @@ function parseStrainData(content) {
     const hybridMatch = content.match(/Hybridization:\s*(.+)/);
     if (hybridMatch) data.hybridization = hybridMatch[1].trim();
 
-    // Extract flavors
-    const flavorsMatch = content.match(/Reported Flavors \(Top 3\):\s*((?:(?!Reported Effects).)+)/s);
+    // Extract flavors - handle both bullet and inline formats
+    const flavorsMatch = content.match(/Reported Flavors[^:]*:\s*((?:(?!Reported Effects|Physical Characteristics).)+)/si);
     if (flavorsMatch) {
-        const flavorsText = flavorsMatch[1].trim();
-        data.flavors = flavorsText.split(/[-•]\s+/).filter(flavor => flavor.trim()).map(flavor => flavor.trim());
+        const flavorsText = cleanMarkdown(flavorsMatch[1].trim());
+        // Check if it's in bullet format or inline
+        if (flavorsText.includes('-')) {
+            data.flavors = flavorsText.split(/[-•]\s+/)
+                .filter(flavor => flavor.trim() && !flavor.includes('Reported Effects'))
+                .map(flavor => flavor.trim());
+        } else {
+            // Handle inline format like "WoodySpicy/herbalEarthy"
+            data.flavors = flavorsText.split(/[,/]/)
+                .filter(f => f.trim())
+                .map(f => f.trim());
+        }
     }
 
-    // Extract effects
-    const effectsMatch = content.match(/Reported Effects \(Top 3\):\s*((?:(?!Physical Characteristics|Availability by State).)+)/s);
+    // Extract effects - handle both bullet and inline formats
+    const effectsMatch = content.match(/Reported Effects[^:]*:\s*((?:(?!Physical Characteristics|Availability|===).)+)/si);
     if (effectsMatch) {
-        const effectsText = effectsMatch[1].trim();
-        data.effects = effectsText.split(/[-•]\s+/).filter(effect => effect.trim()).map(effect => effect.trim());
+        const effectsText = cleanMarkdown(effectsMatch[1].trim());
+        if (effectsText.includes('-')) {
+            data.effects = effectsText.split(/[-•]\s+/)
+                .filter(effect => effect.trim() && !effect.includes('Physical Characteristics'))
+                .map(effect => effect.trim());
+        } else {
+            // Handle inline format
+            data.effects = effectsText.split(/[,/]/)
+                .filter(e => e.trim())
+                .map(e => e.trim());
+        }
     }
 
     // Extract physical characteristics - more flexible parsing
@@ -588,28 +613,50 @@ function parseStrainData(content) {
     const lineageMatch = content.match(/Lineage \/ Genetics:\s*(.+)/);
     if (lineageMatch) data.lineage = lineageMatch[1].trim();
 
-    // Extract trivia - parse into array
-    const triviaMatch = content.match(/Trivia \(Interesting Facts\):\s*((?:(?!Awards).)+)/s);
+    // Extract trivia - handle multiline bullets better
+    const triviaMatch = content.match(/Trivia[^:]*:\s*((?:(?!Similar Strains|Awards|===).)+)/si);
     if (triviaMatch) {
-        const triviaText = triviaMatch[1].trim();
-        data.trivia = triviaText.split(/[-•]\s+/).filter(t => t.trim()).map(t => t.trim());
+        const triviaText = cleanMarkdown(triviaMatch[1].trim());
+        // Split by bullet points but keep multiline items together
+        data.trivia = triviaText.split(/^[-•]\s+/m)
+            .filter(t => t.trim())
+            .map(t => t.replace(/\n/g, ' ').trim());
     }
 
-    // Extract awards - now under RECOGNITION section
-    const awardsMatch = content.match(/Awards:\s*(.+)/);
+    // Extract awards - handle both inline and bullet formats
+    const awardsMatch = content.match(/Awards:\s*((?:(?!User Rating|===).)+)/si);
     if (awardsMatch) {
-        const awardsText = awardsMatch[1].trim();
-        if (!awardsText.toLowerCase().includes('unknown') && awardsText.trim() !== '') {
+        const awardsText = cleanMarkdown(awardsMatch[1].trim());
+        if (!awardsText.toLowerCase().includes('unknown') && 
+            !awardsText.toLowerCase().includes('not specifically listed') && 
+            awardsText.trim() !== '') {
             // Handle both comma-separated and bullet lists
-            data.awards = awardsText.split(/[,\n]/).map(award => award.replace(/^[-•]\s*/, '').trim()).filter(award => award);
+            if (awardsText.includes('-')) {
+                data.awards = awardsText.split(/[-•]\s+/)
+                    .filter(award => award.trim())
+                    .map(award => award.trim());
+            } else {
+                data.awards = awardsText.split(/[,\n]/)
+                    .map(award => award.replace(/^[-•]\s*/, '').trim())
+                    .filter(award => award);
+            }
         }
     }
 
-    // Extract similar strains
-    const similarMatch = content.match(/Similar Strains \(Top 3 by effect\/genetics\):\s*([\s\S]*?)(?=\n(?:Availability by State|User Rating|Insights|===|\w.*?:)|$)/);
+    // Extract similar strains - more flexible parsing
+    const similarMatch = content.match(/Similar Strains[^:]*:\s*((?:(?!===|Availability|User Rating|\w+:).)+)/si);
     if (similarMatch) {
-        const similarText = similarMatch[1].trim();
-        data.similarStrains = similarText.split(/[-•]\s+/).filter(s => s.trim()).map(s => s.trim());
+        const similarText = cleanMarkdown(similarMatch[1].trim());
+        // Handle both bullet and inline formats
+        if (similarText.includes('-')) {
+            data.similarStrains = similarText.split(/[-•]\s+/)
+                .filter(s => s.trim())
+                .map(s => s.split('–')[0].trim()); // Remove descriptions after dash
+        } else {
+            data.similarStrains = similarText.split(/[,\n]/)
+                .filter(s => s.trim())
+                .map(s => s.trim());
+        }
     }
 
     // Extract user rating - updated format
