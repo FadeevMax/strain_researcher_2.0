@@ -165,9 +165,9 @@ Insufficient data for strain 'Galactic Runtz'. Contact web@headquarters.co`
             content: query
           }
         ],
-        max_tokens: 2000,
-        temperature: 0.2,
-        top_p: 0.9
+        max_tokens: 1000,
+        temperature: 0,
+        top_p: 0
       })
     });
 
