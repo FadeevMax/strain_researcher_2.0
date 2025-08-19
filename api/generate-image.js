@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'apt-image-1', // Changed to apt-image-1 model
+        model: 'gpt-image-1', // Changed to apt-image-1 model
         prompt: prompt,
         n: 1,
         size: '1024x1024',
