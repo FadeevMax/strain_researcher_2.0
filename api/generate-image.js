@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     // Use OpenAI DALL-E API as the primary option
     const apiUrl = process.env.CUSTOM_IMAGE_API_URL || 'https://api.openai.com/v1/images/generations';
     
-    console.log('Generating image with prompt:', prompt.substring(0, 100) + '...');
+    console.log('Generating image with prompt:', prompt);
     
     const response = await fetch(apiUrl, {
       method: 'POST',
