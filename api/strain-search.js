@@ -49,11 +49,17 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: `You are a cannabis-industry research assistant.  
-Return the following **13 data fields** for the strain you’re given, using **plain text** and the exact labels below.
+            content: `You are a Cannabis Researcher specializing in investigating Strains by their name and compiling authoritative, structured research. Your sole purpose is to identify and present a strain's name variants, attributes, history, and recognition in a strictly formatted output.
+Your role is **not to write consumer-friendly reviews** but to act as an **objective strain researcher**. Always include **precise details** and **multiple sources when available**.
 
-Put the lines into the four blocks shown, separated by a blank line before and after each block header. If a value is unknown, DO NOT SHOW this line.
+## Objectives
+1. Research the given cannabis strain name (and common variants).
+2. Compile findings into the **structured output format** below.
+3. Include both **hard facts** from Web sources (attributes, history, awards) and **community insights** from Social sources (Reddit remarks, trivia).
+4. Maintain **concise, factual, bullet-point style** with no fluff.
 
+## Required Output Format
+\`\`\`
 === NAME ===
 Strain Name: <text>
 Alt Name(s): <comma-separated list>
@@ -69,95 +75,72 @@ Reported Effects (Top 3):
 - <effect 1>
 - <effect 2>
 - <effect 3>
-Physical Characteristics (Color, Bud Structure, Trichomes):
+Physical Characteristics:
 - <bullet 1>
 - <bullet 2>
 - <bullet 3>
 
 === HISTORY ===
-Original Release Date: <text>
-Lineage / Genetics: <text>
-Trivia (Interesting Facts):
+Original Release Date: <date> or <year>
+Trivia (Interesting facts):
 - <bullet 1>
 - <bullet 2>
 - <bullet 3>
-Similar Strains (Top 3 by effect/genetics):
-- <strain 1>
-- <strain 2>
-- <strain 3>
 
 === RECOGNITION ===
 Awards: <comma-separated list>
-User Rating (Average Score, # of Reviews, Common Comments):
-- <e.g. “4.3 / 5 from 135 reviews”>
+Common Reddit remarks:
 - <comment 1>
 - <comment 2>
 - <comment 3>
+\`\`\`
 
----
-### Rules
-- If full information is not available about the strain (e.g., it's a new hybrid or rare cross). Clearly state that the original strain had insufficient data.
-- If any of the values is unknown (for example, no Nicknames), skip this value and DO NOT SHOW this line.
+## Methodology & Guidance
+- **Prioritize official sources** (Reputable databases like Leafly, Wikileaf, SeedFinder, Strainsdb, Allbud)
+- **Reddit remarks** should reflect authentic user experiences (flavor, effects, grow traits). Select the **most commonly repeated themes**.
+- For **hybridization**, if lineage is unclear, state "Reported as Hybrid (details disputed)".
+- Keep **flavors and effects** to **exactly three each**, ranked by frequency of mention.
+- **Physical characteristics** must be **visual/structural** (bud shape, trichomes, pistils, coloration, density). Avoid "smell" or "taste."
+- Use **bullet-point clarity** in Attributes, History, and Recognition.
+- If any field has no data available, omit that line entirely from the output.
 
-
----
 **(Example for a Successful Primary Search)**
-
-**User input:** "gg #4"
+**User input:** "permanent marker"
 
 **Example Output:**
-
-=== NAME ===
-**Strain Name:** GG #4
-**Alt Name(s):** Original Glue, Gorilla Glue #4, Glue
-**Nickname(s):** GG4, The Glue, Couch-Glue
+=== NAME ===  
+Strain Name: Permanent Marker  
+Alt Name(s): Perm Marker
+Nickname(s): "Permy"
 
 === ATTRIBUTES ===
-**Hybridization:** Hybrid
-**Reported Flavors:**
-- Earthy
-- Pine
-- Chocolate
+Hybridization: Hybrid
+Reported Flavors:
+- Floral
+- Candy
+- Gas
+Reported Effects:
+- Euphoric
+- Relaxed
+- Creative
+Physical Characteristics:
+- Dense buds with shades of green and purple
+- Covered in white trichomes
+- Dense clusters of orange pistils grouped in concentrated patches
 
-**Reported Effects:**
-- Heavy euphoria
-- Munchies
-- Mood elevation
+=== HISTORY ===  
+Original Release Date: 2021
+Trivia (Interesting Facts):
+- Lab results regularly show 2-3% total terpenes with a rare combo - high α-Bisabolol, Limonene, and Linalool - giving it that floral-soapy note layered over classic biscotti gas.
+- Breeder JBeezy (Seed Junky Genetics) spent roughly 2019-2021 working the cross, mating a Biscotti S1 with his back-crossed Sherbert male (Sherb Bx1), then pairing that winning female with Jealousy to lock in the loud "marker" funk.
+- Growers report trimmers' gloves and scissors "reeking like Sharpie" within minutes - hence the tongue-in-cheek "Permanent Marker" moniker that stuck the very first test harvest
 
-**Physical Characteristics (Color, Bud Structure, Trichomes):**
-- Dense, medium-green buds with lime & olive hues
-- Thick blanket of milky trichomes giving a silvery-white frost
-- Sparse but vivid orange pistils
-- Extremely sticky resin glands (scissor-clogging).
-
-=== HISTORY ===
-**Original Release Date:** Phenotype selected and released to market circa 2013; major Cup wins in 2014 established popularity.
-
-**Lineage / Genetics:** Chem’s Sister × Sour Dubb × Chocolate Diesel (phenotype #4 selected by Joesy Whales & Lone Watie of GG Strains)
-
-**Trivia (Interesting Facts):**
-- Discovered accidentally when a hermaphroditic Chem’s Sister pollinated Sour Dubb plants; the keeper seed became phenotype #4—hence “#4” in the name.
-- Named “Gorilla Glue” for the ultra-sticky resin that “glued” trimming scissors together during harvest.
-- Forced to rebrand as “Original Glue / GG4” after trademark litigation with Gorilla Glue adhesive company (2017).
-
-**Similar Strains:**
-- GG #5 (Sister Glue) – same breeding program
-- Chem D – shared Chemdawg lineage / pungent diesel profile
-- Sour Diesel – similar sour-fuel aroma and uplifting head rush
-
-=== RECOGNITION ===
-**Awards:**
-- 1st Place Hybrid – High Times Cannabis Cup Michigan 2014
-- 1st Place Hybrid – High Times Cannabis Cup Los Angeles 2014
-- 1st Place – High Times World Cup Jamaica 2015
-**User Rating:**
-- Leafly average: 4.6 / 5 from 5,400 + user reviews
-- Common Reddit remarks: “instant head euphoria then body melt,” “sticky buds,” strong relief for stress, pain, insomnia; some note dry mouth & anxious onset at high doses.
-
----
-**(Example for a Fallback Scenario)**
-
-Insufficient data for strain 'Galactic Runtz'. Contact web@headquarters.co`
+=== RECOGNITION ===  
+Awards: High Times Strain of the Year 2022, Leafly Strain of the Year 2023
+Common Reddit remarks:
+- "Numbing nose hit that's impressively strong. Instant head euphoria."
+- "Potent and clean high; terpy gas notes make it one of the best hybrids I've tried in years."
+- "Rich, funky marker scent; gave me happy, relaxed vibes without the crash."`
           },
           ...conversation_history.slice(-5),
           {
@@ -204,9 +187,10 @@ function getFallbackResponse(query) {
   return `I'm currently having trouble accessing the strain database, but I can provide some general guidance:
 
 For strain research, typically look for:
-• Genetics & Lineage - Parent strains and breeding history
-• Cannabinoid Profile - THC/CBD percentages and ratios
-• Effects - Physical and mental experiences reported
+• Name variants and nicknames
+• Hybridization type and characteristics
+• Reported flavors and effects
+• Historical information and trivia
 
 Popular strain categories:
 • Sativa - Often energizing, creative, daytime use

@@ -319,174 +319,181 @@ function formatStrainDataAsCards(content) {
     
     const strainData = parseStrainData(content);
     
+    // Build HTML only for sections that have data
+    let nameCardContent = '';
+    let attributesCardContent = '';
+    let historyCardContent = '';
+    let recognitionCardContent = '';
+    
+    // NAME CARD - Always show if we have a name
+    if (strainData.name) {
+        nameCardContent = `
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <img class="card-icon" src="icons/clipart4589359.png" alt="Name icon">
+                        Name
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    <h4 class="strain-name">${strainData.name}</h4>
+                    ${strainData.altNames.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Alternative Names</h5>
+                            <div class="strain-badges">
+                                ${strainData.altNames.map(name => `<span class="strain-badge secondary">${name}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.nicknames.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Nicknames</h5>
+                            <div class="strain-badges">
+                                ${strainData.nicknames.map(name => `<span class="strain-badge outline">${name}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // ATTRIBUTES CARD - Show if we have any attribute data
+    const hasAttributes = strainData.hybridization || strainData.flavors.length > 0 || 
+                         strainData.effects.length > 0 || strainData.physicalCharacteristics.length > 0;
+    
+    if (hasAttributes) {
+        attributesCardContent = `
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <img class="card-icon" src="icons/star.png" alt="Attributes icon">
+                        Attributes
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.hybridization ? `
+                        <div class="strain-field">
+                            <h5>Hybridization</h5>
+                            <p>${strainData.hybridization}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.flavors.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Reported Flavors (Top 3)</h5>
+                            <div class="strain-badges">
+                                ${strainData.flavors.map(flavor => `<span class="strain-badge secondary">${flavor}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.effects.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Reported Effects (Top 3)</h5>
+                            <div class="strain-badges">
+                                ${strainData.effects.map(effect => `<span class="strain-badge outline">${effect}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.physicalCharacteristics.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Physical Characteristics</h5>
+                            <ul class="physical-chars-list">
+                                ${strainData.physicalCharacteristics.map(char => `<li>${char}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // HISTORY CARD - Show if we have any history data
+    const hasHistory = strainData.releaseDate || strainData.trivia.length > 0;
+    
+    if (hasHistory) {
+        historyCardContent = `
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <img class="card-icon" src="icons/14720179.png" alt="History icon">
+                        History
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.releaseDate ? `
+                        <div class="strain-field">
+                            <h5>Original Release Date</h5>
+                            <p>${strainData.releaseDate}</p>
+                        </div>
+                    ` : ''}
+                    ${strainData.trivia.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Trivia (Interesting Facts)</h5>
+                            <ul class="trivia-list">
+                                ${strainData.trivia.map(fact => `<li>${fact}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // RECOGNITION CARD - Show if we have any recognition data
+    const hasRecognition = strainData.awards.length > 0 || strainData.redditRemarks.length > 0;
+    
+    if (hasRecognition) {
+        recognitionCardContent = `
+            <div class="strain-card">
+                <div class="strain-card-header">
+                    <h3 class="strain-card-title">
+                        <img class="card-icon" src="icons/icon_account_management.png" alt="Recognition icon">
+                        Recognition
+                    </h3>
+                </div>
+                <div class="strain-card-content">
+                    ${strainData.awards.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Awards</h5>
+                            <div class="awards-list">
+                                ${strainData.awards.map(award => `<div class="award-item"><span class="award-icon">🏆</span>${award}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${strainData.redditRemarks.length > 0 ? `
+                        <div class="strain-field">
+                            <h5>Common Reddit Remarks</h5>
+                            <div class="reddit-remarks">
+                                ${strainData.redditRemarks.map(remark => `<div class="reddit-item"><span class="bullet">•</span>${remark}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Only return cards that have content
+    const allCards = [nameCardContent, attributesCardContent, historyCardContent, recognitionCardContent]
+        .filter(card => card !== '')
+        .join('');
+    
     return `
         <div class="strain-content-wrapper">
             <div class="strain-dashboard">
-                <!-- Name Card -->
-                <div class="strain-card">
-                    <div class="strain-card-header">
-                        <h3 class="strain-card-title">
-                            <img class="card-icon" src="icons/clipart4589359.png" alt="Name icon">
-                            Name
-                        </h3>
-                    </div>
-                    <div class="strain-card-content">
-                        <h4 class="strain-name">${strainData.name}</h4>
-                        ${strainData.altNames && strainData.altNames.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Alternative Names</h5>
-                                <div class="strain-badges">
-                                    ${strainData.altNames.map(name => `<span class="strain-badge secondary">${name}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${strainData.nicknames && strainData.nicknames.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Nicknames</h5>
-                                <div class="strain-badges">
-                                    ${strainData.nicknames.map(name => `<span class="strain-badge outline">${name}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <!-- Attributes Card -->
-                <div class="strain-card">
-                    <div class="strain-card-header">
-                        <h3 class="strain-card-title">
-                            <img class="card-icon" src="icons/star.png" alt="Attributes icon">
-                            Attributes
-                        </h3>
-                    </div>
-                    <div class="strain-card-content">
-                        ${strainData.hybridization && strainData.hybridization !== 'Unknown' ? `
-                            <div class="strain-field">
-                                <h5>Hybridization</h5>
-                                <p>${strainData.hybridization}</p>
-                            </div>
-                        ` : ''}
-                        ${strainData.flavors && strainData.flavors.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Top Flavors</h5>
-                                <div class="strain-badges">
-                                    ${strainData.flavors.map(flavor => `<span class="strain-badge secondary">${flavor}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${strainData.effects && strainData.effects.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Top Effects</h5>
-                                <div class="strain-badges">
-                                    ${strainData.effects.map(effect => `<span class="strain-badge outline">${effect}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${(strainData.physicalCharacteristics && Object.keys(strainData.physicalCharacteristics).length > 0) ? `
-                            <div class="strain-field">
-                                <h5>Physical Characteristics</h5>
-                                <div class="physical-chars">
-                                    ${strainData.physicalCharacteristics.bullets ? 
-                                        `<ul>${strainData.physicalCharacteristics.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` :
-                                        (strainData.physicalCharacteristics.description ? `<p>${strainData.physicalCharacteristics.description}</p>` : 
-                                        `${strainData.physicalCharacteristics.color ? `<p><strong>Color:</strong> ${strainData.physicalCharacteristics.color}</p>` : ''}
-                                        ${strainData.physicalCharacteristics.budStructure ? `<p><strong>Bud Structure:</strong> ${strainData.physicalCharacteristics.budStructure}</p>` : ''}
-                                        ${strainData.physicalCharacteristics.trichomes ? `<p><strong>Trichomes:</strong> ${strainData.physicalCharacteristics.trichomes}</p>` : ''}`)}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <!-- History Card -->
-                <div class="strain-card">
-                    <div class="strain-card-header">
-                        <h3 class="strain-card-title">
-                            <img class="card-icon" src="icons/14720179.png" alt="History icon">
-                            History
-                        </h3>
-                    </div>
-                    <div class="strain-card-content">
-                        ${strainData.releaseDate && strainData.releaseDate !== 'Unknown' ? `
-                            <div class="strain-field">
-                                <h5>Original Release Date</h5>
-                                <p>${strainData.releaseDate}</p>
-                            </div>
-                        ` : ''}
-                        ${strainData.lineage && strainData.lineage !== 'Unknown' ? `
-                            <div class="strain-field">
-                                <h5>Lineage / Genetics</h5>
-                                <p>${strainData.lineage}</p>
-                            </div>
-                        ` : ''}
-                        ${strainData.trivia && strainData.trivia.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Trivia (Interesting Facts)</h5>
-                                <ul class="trivia-list">
-                                    ${strainData.trivia.map(fact => `<li>${fact}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${strainData.similarStrains && strainData.similarStrains.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Similar Strains</h5>
-                                <div class="strain-badges">
-                                    ${strainData.similarStrains.map(strain => `<span class="strain-badge secondary">${strain}</span>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <!-- Recognition Card -->
-                <div class="strain-card">
-                    <div class="strain-card-header">
-                        <h3 class="strain-card-title">
-                            <img class="card-icon" src="icons/icon_account_management.png" alt="Recognition icon">
-                            Recognition
-                        </h3>
-                    </div>
-                    <div class="strain-card-content">
-                        ${strainData.awards && strainData.awards.length > 0 ? `
-                            <div class="strain-field">
-                                <h5>Awards</h5>
-                                <div class="awards-list">
-                                    ${strainData.awards.map(award => `<div class="award-item"><span class="award-icon">🏆</span>${award}</div>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${strainData.rating ? `
-                            <div class="strain-field">
-                                <h5>User Rating</h5>
-                                <div class="rating-info">
-                                    ${strainData.rating.score ? `
-                                        <div class="rating-score">
-                                            <span class="star-icon">⭐</span>
-                                            <span class="score">${strainData.rating.score}</span>
-                                            ${strainData.rating.reviews ? `<span class="review-count">(${strainData.rating.reviews})</span>` : ''}
-                                        </div>
-                                    ` : ''}
-                                    ${strainData.rating.commonComments && strainData.rating.commonComments.length > 0 ? `
-                                        <div class="common-comments">
-                                            <h6>Common Comments</h6>
-                                            ${strainData.rating.commonComments.map(comment => `<div class="comment-item"><span class="bullet">•</span>${comment}</div>`).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
+                ${allCards}
             </div>
         </div>
-        <div class="image-generation-section">
-            <button class="generate-image-btn" onclick="generateStrainImage()">
-                Generate Strain Image
-            </button>
-            <div class="generated-image-container" id="generated-image-container">
-                <img class="generated-image" id="generated-image" alt="Generated strain image">
+        ${strainData.physicalCharacteristics.length > 0 ? `
+            <div class="image-generation-section">
+                <button class="generate-image-btn" onclick="generateStrainImage()">
+                    Generate Strain Image
+                </button>
+                <div class="generated-image-container" id="generated-image-container">
+                    <img class="generated-image" id="generated-image" alt="Generated strain image">
+                </div>
             </div>
-        </div>
+        ` : ''}
     `;
 }
 
@@ -518,177 +525,103 @@ function parseStrainData(content) {
         hybridization: '',
         flavors: [],
         effects: [],
-        physicalCharacteristics: {},
+        physicalCharacteristics: [],
         releaseDate: '',
-        lineage: '',
         trivia: [],
         awards: [],
-        similarStrains: [],
-        rating: {}
+        redditRemarks: []
     };
 
-    // Extract strain name - handle both "Strain Name:" and "Name:" formats
-    const nameMatch = content.match(/(?:Strain )?Name:\s*(.+)/i);
+    // Extract strain name
+    const nameMatch = content.match(/Strain Name:\s*(.+)/i);
     if (nameMatch) data.name = nameMatch[1].trim();
 
     // Extract alt names
-    const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/);
-    if (altNamesMatch) {
-        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'Unknown');
+    const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/i);
+    if (altNamesMatch && altNamesMatch[1].trim()) {
+        data.altNames = altNamesMatch[1].split(',').map(name => name.trim()).filter(name => name);
     }
 
     // Extract nicknames
-    const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/);
-    if (nicknamesMatch) {
-        data.nicknames = nicknamesMatch[1].split(',').map(name => name.trim()).filter(name => name && name !== 'Unknown');
+    const nicknamesMatch = content.match(/Nickname\(s\):\s*(.+)/i);
+    if (nicknamesMatch && nicknamesMatch[1].trim()) {
+        data.nicknames = nicknamesMatch[1].split(',').map(name => name.replace(/['"]/g, '').trim()).filter(name => name);
     }
 
     // Extract hybridization
-    const hybridMatch = content.match(/Hybridization:\s*(.+)/);
+    const hybridMatch = content.match(/Hybridization:\s*(.+)/i);
     if (hybridMatch) data.hybridization = hybridMatch[1].trim();
 
-    // Extract flavors - handle both bullet and inline formats
-    const flavorsMatch = content.match(/Reported Flavors[^:]*:\s*((?:(?!Reported Effects|Physical Characteristics).)+)/si);
+    // Extract flavors - look for the section and get exactly 3 bullets
+    const flavorsMatch = content.match(/Reported Flavors[^:]*:\s*((?:(?!Reported Effects|Physical Characteristics|===).)+)/si);
     if (flavorsMatch) {
-        const flavorsText = cleanMarkdown(flavorsMatch[1].trim());
-        // Check if it's in bullet format or inline
-        if (flavorsText.includes('-')) {
-            data.flavors = flavorsText.split(/[-•]\s+/)
-                .filter(flavor => flavor.trim() && !flavor.includes('Reported Effects'))
-                .map(flavor => flavor.trim());
-        } else {
-            // Handle inline format like "WoodySpicy/herbalEarthy"
-            data.flavors = flavorsText.split(/[,/]/)
-                .filter(f => f.trim())
-                .map(f => f.trim());
-        }
+        const flavorsText = flavorsMatch[1].trim();
+        data.flavors = flavorsText.split(/^[-•]\s*/m)
+            .filter(f => f.trim())
+            .map(f => f.trim())
+            .slice(0, 3);
     }
 
-    // Extract effects - handle both bullet and inline formats
-    const effectsMatch = content.match(/Reported Effects[^:]*:\s*((?:(?!Physical Characteristics|Availability|===).)+)/si);
+    // Extract effects - look for the section and get exactly 3 bullets
+    const effectsMatch = content.match(/Reported Effects[^:]*:\s*((?:(?!Physical Characteristics|===|HISTORY).)+)/si);
     if (effectsMatch) {
-        const effectsText = cleanMarkdown(effectsMatch[1].trim());
-        if (effectsText.includes('-')) {
-            data.effects = effectsText.split(/[-•]\s+/)
-                .filter(effect => effect.trim() && !effect.includes('Physical Characteristics'))
-                .map(effect => effect.trim());
-        } else {
-            // Handle inline format
-            data.effects = effectsText.split(/[,/]/)
-                .filter(e => e.trim())
-                .map(e => e.trim());
-        }
+        const effectsText = effectsMatch[1].trim();
+        data.effects = effectsText.split(/^[-•]\s*/m)
+            .filter(e => e.trim())
+            .map(e => e.trim())
+            .slice(0, 3);
     }
 
-    // Extract physical characteristics - more flexible parsing
-    const physicalMatch = content.match(/Physical Characteristics[^:]*:?\s*((?:(?!Original Release Date|History|Lineage|Similar Strains|Availability|User Rating|Awards).)+)/si);
+    // Extract physical characteristics - now just a simple bullet list
+    const physicalMatch = content.match(/Physical Characteristics:\s*((?:(?!===|HISTORY|Original Release).)+)/si);
     if (physicalMatch) {
         const physicalText = physicalMatch[1].trim();
-        currentPhysicalCharacteristics = physicalText;
-        
-        // Split into bullets if present, else treat as description
-        const physicalBullets = physicalText.split(/[-•]\s+/).filter(b => b.trim()).map(b => b.trim());
-        if (physicalBullets.length > 1) {
-            data.physicalCharacteristics.bullets = physicalBullets;
-        } else if (!physicalText.includes('Color:') && !physicalText.includes('Bud Structure:') && !physicalText.includes('Trichome')) {
-            data.physicalCharacteristics.description = physicalText;
-        } else {
-            // Parse specific characteristics if they exist
-            const budMatch = physicalText.match(/Bud Structure:\s*([^.]+)/i);
-            if (budMatch) data.physicalCharacteristics.budStructure = budMatch[1].trim();
-            
-            const colorMatch = physicalText.match(/Color:\s*([^.]+)/i);
-            if (colorMatch) data.physicalCharacteristics.color = colorMatch[1].trim();
-            
-            const trichomeMatch = physicalText.match(/Trichome[^:]*:\s*([^.]+)/i);
-            if (trichomeMatch) data.physicalCharacteristics.trichomes = trichomeMatch[1].trim();
-        }
+        data.physicalCharacteristics = physicalText.split(/^[-•]\s*/m)
+            .filter(p => p.trim())
+            .map(p => p.trim());
+        // Store for image generation
+        currentPhysicalCharacteristics = data.physicalCharacteristics.join('. ');
     }
 
     // Extract release date
-    const releaseDateMatch = content.match(/Original Release Date:\s*(.+)/);
-    if (releaseDateMatch) data.releaseDate = releaseDateMatch[1].trim();
+    const releaseDateMatch = content.match(/Original Release Date:\s*(.+)/i);
+    if (releaseDateMatch && releaseDateMatch[1].trim()) {
+        data.releaseDate = releaseDateMatch[1].trim();
+    }
 
-    // Extract lineage
-    const lineageMatch = content.match(/Lineage \/ Genetics:\s*(.+)/);
-    if (lineageMatch) data.lineage = lineageMatch[1].trim();
-
-    // Extract trivia - handle multiline bullets better
-    const triviaMatch = content.match(/Trivia[^:]*:\s*((?:(?!Similar Strains|Awards|===).)+)/si);
+    // Extract trivia
+    const triviaMatch = content.match(/Trivia[^:]*:\s*((?:(?!===|RECOGNITION|Awards).)+)/si);
     if (triviaMatch) {
-        const triviaText = cleanMarkdown(triviaMatch[1].trim());
-        // Split by bullet points but keep multiline items together
-        data.trivia = triviaText.split(/^[-•]\s+/m)
+        const triviaText = triviaMatch[1].trim();
+        data.trivia = triviaText.split(/^[-•]\s*/m)
             .filter(t => t.trim())
             .map(t => t.replace(/\n/g, ' ').trim());
     }
 
-    // Extract awards - handle both inline and bullet formats
-    const awardsMatch = content.match(/Awards:\s*((?:(?!User Rating|===).)+)/si);
-    if (awardsMatch) {
-        const awardsText = cleanMarkdown(awardsMatch[1].trim());
-        if (!awardsText.toLowerCase().includes('unknown') && 
-            !awardsText.toLowerCase().includes('not specifically listed') && 
-            awardsText.trim() !== '') {
-            // Handle both comma-separated and bullet lists
-            if (awardsText.includes('-')) {
-                data.awards = awardsText.split(/[-•]\s+/)
-                    .filter(award => award.trim())
-                    .map(award => award.trim());
-            } else {
-                data.awards = awardsText.split(/[,\n]/)
-                    .map(award => award.replace(/^[-•]\s*/, '').trim())
-                    .filter(award => award);
-            }
+    // Extract awards
+    const awardsMatch = content.match(/Awards:\s*(.+?)(?=\n|Common Reddit|$)/si);
+    if (awardsMatch && awardsMatch[1].trim()) {
+        const awardsText = awardsMatch[1].trim();
+        if (!awardsText.toLowerCase().includes('unknown') && !awardsText.toLowerCase().includes('none')) {
+            data.awards = awardsText.split(',').map(award => award.trim()).filter(award => award);
         }
     }
 
-    // Extract similar strains - more flexible parsing
-    const similarMatch = content.match(/Similar Strains[^:]*:\s*((?:(?!===|Availability|User Rating|\w+:).)+)/si);
-    if (similarMatch) {
-        const similarText = cleanMarkdown(similarMatch[1].trim());
-        // Handle both bullet and inline formats
-        if (similarText.includes('-')) {
-            data.similarStrains = similarText.split(/[-•]\s+/)
-                .filter(s => s.trim())
-                .map(s => s.split('–')[0].trim()); // Remove descriptions after dash
-        } else {
-            data.similarStrains = similarText.split(/[,\n]/)
-                .filter(s => s.trim())
-                .map(s => s.trim());
-        }
+    // Extract Reddit remarks (NEW)
+    const redditMatch = content.match(/Common Reddit remarks:\s*((?:.|\n)+?)(?=\n\n|$)/si);
+    if (redditMatch) {
+        const redditText = redditMatch[1].trim();
+        data.redditRemarks = redditText.split(/^[-•]\s*/m)
+            .filter(r => r.trim())
+            .map(r => r.replace(/["""]/g, '').trim());
     }
 
-    // Extract user rating - updated format
-    const ratingMatch = content.match(/User Rating[^:]*:\s*((?:.|\n)+?)(?=\n\n|$)/);
-    if (ratingMatch) {
-        const ratingText = ratingMatch[1].trim();
-        const lines = ratingText.split('\n').filter(l => l.trim()).map(l => l.replace(/^[-•]\s*/, '').trim());
-        
-        // First line should be the rating format
-        if (lines[0]) {
-            // Match patterns like "4.3 / 5 from 135 reviews" or "Leafly average: 4.6 / 5 from 5,400 + user reviews"
-            const scoreMatch = lines[0].match(/(\d+\.?\d*)\s*\/\s*5/);
-            if (scoreMatch) data.rating.score = parseFloat(scoreMatch[1]);
-            
-            const reviewMatch = lines[0].match(/(?:from\s+)?(\d{1,3}(?:,\d{3})*|\d+)\s*\+?\s*(?:user\s+)?reviews?/i);
-            if (reviewMatch) data.rating.reviews = reviewMatch[1].replace(/,/g, '') + (lines[0].includes('+') ? '+' : '') + ' reviews';
-        }
-        
-        // Remaining lines are comments
-        data.rating.commonComments = lines.slice(1).map(comment => comment.replace(/["""]/g, '').trim()).filter(c => c && !c.toLowerCase().includes('common'));
-    }
-
-    // Remove any trailing " ===" accidentally captured
+    // Clean up any trailing content
     for (const key in data) {
         if (typeof data[key] === 'string') {
             data[key] = data[key].replace(/\s*===\s*$/, '').trim();
-            // Also filter out "Unknown" values
-            if (data[key].toLowerCase() === 'unknown') {
-                data[key] = '';
-            }
         } else if (Array.isArray(data[key])) {
-            data[key] = data[key].map(v => v.replace(/\s*===\s*$/, '').trim()).filter(v => v && v.toLowerCase() !== 'unknown');
+            data[key] = data[key].map(v => typeof v === 'string' ? v.replace(/\s*===\s*$/, '').trim() : v);
         }
     }
     
