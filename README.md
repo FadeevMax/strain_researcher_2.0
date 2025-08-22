@@ -1,6 +1,6 @@
 # Strain Search - Cannabis Research Assistant
 
-A modern web application for cannabis strain research powered by Perplexity AI. Built with HTML/CSS frontend and Python backend, deployed on Vercel.
+A modern web application for cannabis strain research powered by Perplexity AI. Built with HTML/CSS frontend and Python backend, deployed on Vercel. 
 
 ## Features
 
