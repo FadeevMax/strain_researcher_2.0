@@ -1058,3 +1058,203 @@ li {
         height: 45px;
     }
 }
+
+/* Add these CSS rules to your style.css file */
+
+/* Fix for physical characteristics list */
+.physical-chars-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.physical-chars-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #ffffff;
+    line-height: 1.4;
+}
+
+.physical-chars-list li:before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #a1a1a1;
+}
+
+/* Reddit remarks styling */
+.reddit-remarks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reddit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 15px;
+    color: #ffffff;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+/* Mobile fixes for suggestions container */
+@media (max-width: 768px) {
+    .suggestions-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    
+    .suggestions {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .suggestions::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .suggestions::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .suggestions::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+    
+    .suggestion-btn {
+        flex: 0 0 auto;
+        min-width: fit-content;
+    }
+}
+
+/* Fix search button positioning on mobile */
+@media (max-width: 480px) {
+    .search-input-container {
+        height: 56px;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .search-input {
+        flex: 1;
+        font-size: 16px;
+        padding-right: 10px;
+    }
+    
+    .search-button {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .search-icon {
+        width: 18px;
+        height: 18px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .send-icon {
+        transform: translate(-50%, -50%);
+    }
+    
+    /* Center main title on mobile */
+    .main-title {
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    /* Ensure search container is centered */
+    .search-container {
+        width: 90%;
+        max-width: 100%;
+        margin: 20px auto;
+    }
+}
+
+/* Additional mobile improvements */
+@media (max-width: 768px) {
+    /* Adjust strain dashboard for mobile */
+    .strain-dashboard {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 0 10px;
+        margin-top: 30px;
+    }
+    
+    /* Better card spacing on mobile */
+    .strain-card {
+        margin-bottom: 0;
+    }
+    
+    .strain-card-content {
+        max-height: none;
+        padding: 16px;
+    }
+    
+    /* Better badge layout on mobile */
+    .strain-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .strain-badge {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    /* Adjust header in results view */
+    .header.results-view {
+        padding: 15px 10px;
+    }
+    
+    .header.results-view .logo {
+        width: 50px;
+        height: 50px;
+    }
+    
+    /* Adjust image generation button */
+    .generate-image-btn {
+        font-size: 16px;
+        padding: 14px 24px;
+    }
+}
+
+/* Ensure proper centering on very small screens */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .main-title {
+        font-size: 24px;
+    }
+    
+    .search-container {
+        width: 95%;
+    }
+    
+    .suggestions-container {
+        width: 100%;
+    }
+}
