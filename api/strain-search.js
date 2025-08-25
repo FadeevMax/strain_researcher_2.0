@@ -149,8 +149,8 @@ Common Reddit remarks:
           }
         ],
         max_tokens: 1000,
-        temperature: 0,
-        top_p: 1.0
+        temperature: 0.05
+        //top_p: 1.0
       })
     });
 
