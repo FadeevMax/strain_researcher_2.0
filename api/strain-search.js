@@ -110,7 +110,7 @@ Common Reddit remarks:
 - Keep **flavors and effects** to **exactly three each**, ranked by frequency of mention.
 - **Physical characteristics** must be **visual/structural** (bud shape, trichomes, pistils, coloration, density). Avoid “smell” or “taste.”
 - Use **bullet-point clarity** in Attributes, History, and Recognition.
-
+- Do NOT include citation numbers (removing the ‘[1]’, ‘[2]’, ‘[3]’…)
 
 ---
 **(Example for a Successful Primary Search)**
