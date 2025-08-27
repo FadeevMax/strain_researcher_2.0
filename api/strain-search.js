@@ -44,68 +44,100 @@ function parseLLMOutput(content) {
   };
 
   try {
+    // Remove citation numbers like [1][2][3] from content
+    const cleanContent = content.replace(/\[\d+\]/g, '');
+    
     // Extract strain name
-    const nameMatch = content.match(/Strain Name:\s*(.+?)(?:\n|$)/);
-    if (nameMatch) data['Strain name'] = nameMatch[1].replace(/\*\*/g, '').trim();
+    const nameMatch = cleanContent.match(/Strain Name:\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
+    if (nameMatch) data['Strain name'] = nameMatch[1].trim();
 
     // Extract alt names
-    const altMatch = content.match(/Alt Name\(s\):\s*(.+?)(?:\n|$)/);
-    if (altMatch) data['Alt Name(s)'] = altMatch[1].replace(/\*\*/g, '').trim();
+    const altMatch = cleanContent.match(/Alt Name\(s\):\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
+    if (altMatch) data['Alt Name(s)'] = altMatch[1].trim();
 
-    // Extract nicknames
-    const nickMatch = content.match(/Nickname\(s\):\s*(.+?)(?:\n|$)/);
-    if (nickMatch) data['Nickname(s)'] = nickMatch[1].replace(/\*\*/g, '').trim();
-
-    // Extract hybridization
-    const hybridMatch = content.match(/Hybridization:\s*(.+?)(?:\n|$)/);
-    if (hybridMatch) data['Hybridization'] = hybridMatch[1].replace(/\*\*/g, '').trim();
-
-    // Extract flavors
-    const flavorsMatch = content.match(/Reported Flavors.*?:\n((?:- .+\n?){1,3})/);
-    if (flavorsMatch) {
-      const flavors = flavorsMatch[1].match(/- (.+)/g)?.map(f => f.replace('- ', '').trim()).join(', ');
-      if (flavors) data['Reported Flavors (Top 3)'] = flavors;
+    // Extract nicknames - handle quoted format
+    const nickMatch = cleanContent.match(/Nickname\(s\):\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
+    if (nickMatch) {
+      // Remove quotes and clean up
+      data['Nickname(s)'] = nickMatch[1].replace(/["']/g, '').trim();
     }
 
-    // Extract effects
-    const effectsMatch = content.match(/Reported Effects.*?:\n((?:- .+\n?){1,3})/);
-    if (effectsMatch) {
-      const effects = effectsMatch[1].match(/- (.+)/g)?.map(e => e.replace('- ', '').trim()).join(', ');
-      if (effects) data['Reported Effects (Top 3)'] = effects;
+    // Extract hybridization - capture everything until next section
+    const hybridMatch = cleanContent.match(/Hybridization:\s*\*{0,2}(.+?)(?=\n\*{0,2}Reported|\n=|$)/s);
+    if (hybridMatch) data['Hybridization'] = hybridMatch[1].replace(/\*\*/g, '').trim();
+
+    // Extract flavors - look for bullet points after the field name
+    const flavorsSection = cleanContent.match(/Reported Flavors[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    if (flavorsSection) {
+      const bullets = flavorsSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
+      if (bullets) {
+        const flavors = bullets.map(b => b.replace(/[-•]\s*/, '').trim()).filter(f => f);
+        if (flavors.length > 0) data['Reported Flavors (Top 3)'] = flavors.slice(0, 3).join(', ');
+      }
+    }
+
+    // Extract effects - look for bullet points after the field name
+    const effectsSection = cleanContent.match(/Reported Effects[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    if (effectsSection) {
+      const bullets = effectsSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
+      if (bullets) {
+        const effects = bullets.map(e => e.replace(/[-•]\s*/, '').replace(/\*\*/g, '').trim()).filter(e => e);
+        if (effects.length > 0) data['Reported Effects (Top 3)'] = effects.slice(0, 3).join(', ');
+      }
     }
 
     // Extract physical characteristics
-    const physicalMatch = content.match(/Physical Characteristics:\n((?:- .+\n?){1,3})/);
-    if (physicalMatch) {
-      const characteristics = physicalMatch[1].match(/- (.+)/g)?.map(c => c.replace('- ', '').trim()).join('; ');
-      if (characteristics) data['Physical Characteristics'] = characteristics;
+    const physicalSection = cleanContent.match(/Physical Characteristics[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    if (physicalSection) {
+      const bullets = physicalSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
+      if (bullets) {
+        const characteristics = bullets.map(c => c.replace(/[-•]\s*/, '').trim()).filter(c => c);
+        if (characteristics.length > 0) data['Physical Characteristics'] = characteristics.join('; ');
+      }
     }
 
-    // Extract release date
-    const dateMatch = content.match(/Original Release Date:\s*(.+?)(?:\n|$)/);
+    // Extract release date - capture everything until next section
+    const dateMatch = cleanContent.match(/Original Release Date:\s*\*{0,2}(.+?)(?=\n\*{0,2}Trivia|\n\*{0,2}TRIVIA|\n=|$)/s);
     if (dateMatch) data['Original Release Date'] = dateMatch[1].replace(/\*\*/g, '').trim();
 
-    // Extract trivia
-    const triviaMatch = content.match(/Trivia.*?:\n((?:- .+\n?){1,3})/);
-    if (triviaMatch) {
-      const trivia = triviaMatch[1].match(/- (.+)/g)?.map(t => t.replace('- ', '').trim()).join('; ');
-      if (trivia) data['Trivia (Interesting facts)'] = trivia;
+    // Extract trivia - look for bullet points
+    const triviaSection = cleanContent.match(/Trivia[^:]*:\s*\n((?:[^\n=]*\n){0,10})/i);
+    if (triviaSection) {
+      const bullets = triviaSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
+      if (bullets) {
+        const trivia = bullets.map(t => t.replace(/[-•]\s*/, '').trim()).filter(t => t && !t.startsWith('==='));
+        if (trivia.length > 0) data['Trivia (Interesting facts)'] = trivia.join('; ');
+      }
     }
 
-    // Extract awards
-    const awardsMatch = content.match(/Awards:\s*(.+?)(?:\n|$)/);
-    if (awardsMatch) data['Awards'] = awardsMatch[1].replace(/\*\*/g, '').trim();
+    // Extract awards - capture everything until next section
+    const awardsMatch = cleanContent.match(/Awards:\s*\n?[-•]?\s*(.+?)(?=\n\*{0,2}Common|\n=|$)/s);
+    if (awardsMatch) {
+      const awardsText = awardsMatch[1].replace(/[-•]\s*/, '').replace(/\*\*/g, '').trim();
+      if (awardsText && awardsText !== 'N/A') data['Awards'] = awardsText;
+    }
 
     // Extract Reddit remarks
-    const redditMatch = content.match(/Common Reddit remarks.*?:\n((?:- .+\n?){1,3})/);
-    if (redditMatch) {
-      const remarks = redditMatch[1].match(/- "?(.+?)"?(?:\n|$)/g)?.map(r => r.replace(/^- "?/, '').replace(/"?$/, '').trim()).join('; ');
-      if (remarks) data['Common Reddit remarks'] = remarks;
+    const redditSection = cleanContent.match(/Common Reddit remarks[^:]*:\s*\n((?:[^\n=]*\n){0,10})/i);
+    if (redditSection) {
+      const bullets = redditSection[1].match(/[-•]\s*"?(.+?)"?(?:\n|$)/g);
+      if (bullets) {
+        const remarks = bullets.map(r => {
+          return r.replace(/[-•]\s*/, '')
+                  .replace(/^["']/, '')
+                  .replace(/["']$/, '')
+                  .trim();
+        }).filter(r => r && !r.startsWith('==='));
+        if (remarks.length > 0) data['Common Reddit remarks'] = remarks.join('; ');
+      }
     }
   } catch (error) {
     console.error('Error parsing LLM output:', error);
   }
 
+  // Log parsed data for debugging
+  console.log('Parsed data:', data);
+  
   return data;
 }
 
@@ -121,55 +153,81 @@ function formatDatabaseRow(row) {
   format.push('\n=== ATTRIBUTES ===');
   format.push(`Hybridization: ${row['Hybridization'] || 'N/A'}`);
   
+  // Format flavors as bullet points
   if (row['Reported Flavors (Top 3)'] && row['Reported Flavors (Top 3)'] !== 'N/A') {
     format.push('Reported Flavors (Top 3):');
     row['Reported Flavors (Top 3)'].split(',').forEach(f => {
       format.push(`- ${f.trim()}`);
     });
   } else {
-    format.push('Reported Flavors (Top 3): N/A');
+    format.push('Reported Flavors (Top 3):');
+    format.push('- N/A');
   }
   
+  // Format effects as bullet points
   if (row['Reported Effects (Top 3)'] && row['Reported Effects (Top 3)'] !== 'N/A') {
     format.push('Reported Effects (Top 3):');
     row['Reported Effects (Top 3)'].split(',').forEach(e => {
       format.push(`- ${e.trim()}`);
     });
   } else {
-    format.push('Reported Effects (Top 3): N/A');
+    format.push('Reported Effects (Top 3):');
+    format.push('- N/A');
   }
   
+  // Format physical characteristics as bullet points
   if (row['Physical Characteristics'] && row['Physical Characteristics'] !== 'N/A') {
     format.push('Physical Characteristics:');
     row['Physical Characteristics'].split(';').forEach(c => {
       format.push(`- ${c.trim()}`);
     });
   } else {
-    format.push('Physical Characteristics: N/A');
+    format.push('Physical Characteristics:');
+    format.push('- N/A');
   }
   
   format.push('\n=== HISTORY ===');
   format.push(`Original Release Date: ${row['Original Release Date'] || 'N/A'}`);
   
+  // Format trivia as bullet points
   if (row['Trivia (Interesting facts)'] && row['Trivia (Interesting facts)'] !== 'N/A') {
     format.push('Trivia (Interesting facts):');
     row['Trivia (Interesting facts)'].split(';').forEach(t => {
       format.push(`- ${t.trim()}`);
     });
   } else {
-    format.push('Trivia (Interesting facts): N/A');
+    format.push('Trivia (Interesting facts):');
+    format.push('- N/A');
   }
   
   format.push('\n=== RECOGNITION ===');
-  format.push(`Awards: ${row['Awards'] || 'N/A'}`);
   
+  // Handle awards - keep as single line if simple list
+  if (row['Awards'] && row['Awards'] !== 'N/A') {
+    // Check if awards contain semicolons (multiple awards)
+    if (row['Awards'].includes(';')) {
+      format.push('Awards:');
+      row['Awards'].split(';').forEach(a => {
+        format.push(`- ${a.trim()}`);
+      });
+    } else {
+      format.push(`Awards: ${row['Awards']}`);
+    }
+  } else {
+    format.push('Awards: N/A');
+  }
+  
+  // Format Reddit remarks as bullet points
   if (row['Common Reddit remarks'] && row['Common Reddit remarks'] !== 'N/A') {
     format.push('Common Reddit remarks:');
     row['Common Reddit remarks'].split(';').forEach(r => {
-      format.push(`- ${r.trim()}`);
+      // Remove quotes if they exist in the stored data
+      const cleanRemark = r.trim().replace(/^["']|["']$/g, '');
+      format.push(`- "${cleanRemark}"`);
     });
   } else {
-    format.push('Common Reddit remarks: N/A');
+    format.push('Common Reddit remarks:');
+    format.push('- N/A');
   }
   
   return format.join('\n');
@@ -327,7 +385,7 @@ async function updateNAFields(apiKey, strainName, naFields, currentData) {
         messages: [
           {
             role: 'system',
-            content: `You are a Cannabis Researcher specializing in investigating Strains by their name and compiling authoritative, structured research. Your sole purpose is to identify and present a strain’s name variants, attributes, history, and recognition in a strictly formatted output.
+            content: process.env.PERPLEXITY_SYSTEM_PROMPT || `You are a Cannabis Researcher specializing in investigating Strains by their name and compiling authoritative, structured research. Your sole purpose is to identify and present a strain’s name variants, attributes, history, and recognition in a strictly formatted output.
 
 Your role is **not to write consumer-friendly reviews** but to act as an **objective strain researcher**. Always include **precise details** and **multiple sources when available**.
 
@@ -435,6 +493,7 @@ Common Reddit remarks:
 - "Numbing nose hit that's impressively strong. Instant head euphoria."
 - "Potent and clean high; terpy gas notes make it one of the best hybrids I've tried in years."
 - "Rich, funky marker scent; gave me happy, relaxed vibes without the crash.` // Your existing prompt
+ // Your existing prompt
           },
           {
             role: 'user',
@@ -678,7 +737,8 @@ Common Reddit remarks:
 **Common Reddit remarks**
 - "Numbing nose hit that's impressively strong. Instant head euphoria."
 - "Potent and clean high; terpy gas notes make it one of the best hybrids I've tried in years."
-- "Rich, funky marker scent; gave me happy, relaxed vibes without the crash.`  // Your existing prompt
+- "Rich, funky marker scent; gave me happy, relaxed vibes without the crash.` // Your existing prompt
+ // Your existing prompt
           },
           ...conversation_history.slice(-5),
           {
@@ -747,3 +807,4 @@ Popular strain categories:
 
 Please try your search again in a moment!`;
 }
+
