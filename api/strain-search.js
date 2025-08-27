@@ -184,16 +184,18 @@ function parseLLMOutput(content) {
       }
       
       // Extract Reddit remarks - only from recognition section
-      const redditMatch = sections.recognition.match(/Common Reddit remarks[^:]*:\s*\n?((?:[-•]\s*["""]?.+?["""]?\n?)+)/i);
+      const redditMatch = sections.recognition.match(/Common Reddit remarks[^:]*:\s*\n?([\s\S]*?)$/i);
       if (redditMatch) {
-        const bullets = redditMatch[1].match(/[-•]\s*["""]?(.+?)["""]?(?:\n|$)/g);
+        const redditContent = redditMatch[1].trim();
+        // Look for bullet points
+        const bullets = redditContent.match(/[-•]\s*["""]?(.+?)["""]?(?=\n[-•]|\n*$)/g);
         if (bullets) {
           const remarks = bullets.map(r => {
             return r.replace(/[-•]\s*/, '')
                     .replace(/^["""']/, '')
                     .replace(/["""']$/, '')
                     .trim();
-          }).filter(r => r && r !== 'N/A');
+          }).filter(r => r && r !== 'N/A' && r.length > 1);
           if (remarks.length > 0) {
             data['Common Reddit remarks'] = remarks.join('; ');
           }
@@ -575,6 +577,7 @@ Common Reddit remarks:
 - "Numbing nose hit that's impressively strong. Instant head euphoria."
 - "Potent and clean high; terpy gas notes make it one of the best hybrids I've tried in years."
 - "Rich, funky marker scent; gave me happy, relaxed vibes without the crash.` // Your existing prompt
+
           },
           {
             role: 'user',
@@ -819,6 +822,7 @@ Common Reddit remarks:
 - "Numbing nose hit that's impressively strong. Instant head euphoria."
 - "Potent and clean high; terpy gas notes make it one of the best hybrids I've tried in years."
 - "Rich, funky marker scent; gave me happy, relaxed vibes without the crash.` // Your existing prompt
+
           },
           ...conversation_history.slice(-5),
           {
