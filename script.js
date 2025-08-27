@@ -599,28 +599,41 @@ function parseStrainData(content) {
     }
 
     // Extract awards
-    const awardsMatch = content.match(/Awards:\s*([\s\S]*?)(?=Common Reddit|$)/i);
-    if (awardsMatch && awardsMatch[1].trim()) {
-        const awardsText = awardsMatch[1].trim();
-        if (!awardsText.toLowerCase().includes('unknown') && !awardsText.toLowerCase().includes('none')) {
-            // Check if it contains bullet points
-            if (awardsText.includes('-') || awardsText.includes('•')) {
-                // Extract bullet points
-                const bullets = awardsText.match(/[-•]\s*([^\n-•]+)/g);
-                if (bullets) {
-                    data.awards = bullets.map(award => 
-                        award.replace(/[-•]\s*/, '').trim()
-                    ).filter(award => award && award.length > 2);
-                }
-            } else {
-                // Single line or comma-separated
-                data.awards = awardsText.split(/[,;]/).map(award => award.trim()).filter(award => award);
-                // If no commas/semicolons, treat as single award
-                if (data.awards.length === 0 && awardsText.trim()) {
-                    data.awards = [awardsText.trim()];
-                }
-            }
+    const awardsMatch = content.match(/Awards:\s*([\s\S]*?)(?=\n(?![-•])\S|Common Reddit|$)/i);
+    if (awardsMatch) {
+    const awardsBlock = awardsMatch[1].trim();
+
+    // If the entire block is literally "unknown" or "none", skip.
+    if (!/^\s*(unknown|none)\s*$/i.test(awardsBlock) && awardsBlock) {
+        const lines = awardsBlock.split(/\r?\n/);
+
+        const items = [];
+        let current = "";
+
+        for (const line of lines) {
+        if (/^\s*[-•]\s+/.test(line)) {
+            // New bullet starts
+            if (current) items.push(current.trim());
+            current = line.replace(/^\s*[-•]\s+/, "").trim();
+        } else if (line.trim()) {
+            // Continuation of previous bullet
+            current += (current ? " " : "") + line.trim();
         }
+        // empty lines are ignored
+        }
+        if (current) items.push(current.trim());
+
+        if (items.length) {
+        // Optionally drop bullets that are literally "unknown"/"none"
+        data.awards = items.filter(x => !/^\s*(unknown|none)\s*$/i.test(x));
+        } else {
+        // Fallback: no bullets found — try comma/semicolon separated list
+        data.awards = awardsBlock
+            .split(/[,;]\s*/)
+            .map(s => s.trim())
+            .filter(Boolean);
+        }
+    }
     }
 
     // Extract Reddit remarks (NEW)
