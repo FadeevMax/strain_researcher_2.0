@@ -44,91 +44,137 @@ function parseLLMOutput(content) {
   };
 
   try {
-    // Remove citation numbers like [1][2][3] from content
-    const cleanContent = content.replace(/\[\d+\]/g, '');
+    // Remove citation numbers like [1][2][3] and asterisks from content
+    const cleanContent = content.replace(/\[\d+\]/g, '').replace(/\*\*/g, '');
     
     // Extract strain name
-    const nameMatch = cleanContent.match(/Strain Name:\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
+    const nameMatch = cleanContent.match(/Strain Name:\s*(.+?)(?:\n|$)/i);
     if (nameMatch) data['Strain name'] = nameMatch[1].trim();
 
     // Extract alt names
-    const altMatch = cleanContent.match(/Alt Name\(s\):\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
-    if (altMatch) data['Alt Name(s)'] = altMatch[1].trim();
-
-    // Extract nicknames - handle quoted format
-    const nickMatch = cleanContent.match(/Nickname\(s\):\s*\*{0,2}(.+?)\*{0,2}(?:\n|$)/);
-    if (nickMatch) {
-      // Remove quotes and clean up
-      data['Nickname(s)'] = nickMatch[1].replace(/["']/g, '').trim();
+    const altMatch = cleanContent.match(/Alt Name\(s\):\s*(.+?)(?:\n|$)/i);
+    if (altMatch && altMatch[1].trim() && !altMatch[1].includes('N/A')) {
+      data['Alt Name(s)'] = altMatch[1].trim();
     }
 
-    // Extract hybridization - capture everything until next section
-    const hybridMatch = cleanContent.match(/Hybridization:\s*\*{0,2}(.+?)(?=\n\*{0,2}Reported|\n=|$)/s);
-    if (hybridMatch) data['Hybridization'] = hybridMatch[1].replace(/\*\*/g, '').trim();
+    // Extract nicknames - handle quoted format and "None" responses
+    const nickMatch = cleanContent.match(/Nickname\(s\):\s*(.+?)(?:\n|$)/i);
+    if (nickMatch && nickMatch[1].trim()) {
+      const nickValue = nickMatch[1].replace(/["']/g, '').trim();
+      if (!nickValue.toLowerCase().includes('none') && !nickValue.includes('N/A')) {
+        data['Nickname(s)'] = nickValue;
+      }
+    }
 
-    // Extract flavors - look for bullet points after the field name
-    const flavorsSection = cleanContent.match(/Reported Flavors[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    // Extract hybridization - capture everything until next section marker
+    const hybridMatch = cleanContent.match(/Hybridization:\s*(.+?)(?=\nReported|\n\n|===|$)/si);
+    if (hybridMatch) {
+      const hybridValue = hybridMatch[1].trim();
+      if (hybridValue && !hybridValue.includes('N/A')) {
+        data['Hybridization'] = hybridValue;
+      }
+    }
+
+    // Extract flavors - improved pattern to catch bullet points
+    const flavorsSection = cleanContent.match(/Reported Flavors[^:]*:\s*\n?((?:[-•]\s*.+\n?){1,3})/i);
     if (flavorsSection) {
       const bullets = flavorsSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
       if (bullets) {
-        const flavors = bullets.map(b => b.replace(/[-•]\s*/, '').trim()).filter(f => f);
-        if (flavors.length > 0) data['Reported Flavors (Top 3)'] = flavors.slice(0, 3).join(', ');
+        const flavors = bullets.map(b => b.replace(/[-•]\s*/, '').trim()).filter(f => f && f !== 'N/A');
+        if (flavors.length > 0) {
+          data['Reported Flavors (Top 3)'] = flavors.slice(0, 3).join(', ');
+        }
       }
     }
 
-    // Extract effects - look for bullet points after the field name
-    const effectsSection = cleanContent.match(/Reported Effects[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    // Extract effects - improved pattern
+    const effectsSection = cleanContent.match(/Reported Effects[^:]*:\s*\n?((?:[-•]\s*.+\n?){1,3})/i);
     if (effectsSection) {
       const bullets = effectsSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
       if (bullets) {
-        const effects = bullets.map(e => e.replace(/[-•]\s*/, '').replace(/\*\*/g, '').trim()).filter(e => e);
-        if (effects.length > 0) data['Reported Effects (Top 3)'] = effects.slice(0, 3).join(', ');
+        const effects = bullets.map(e => e.replace(/[-•]\s*/, '').trim()).filter(e => e && e !== 'N/A');
+        if (effects.length > 0) {
+          data['Reported Effects (Top 3)'] = effects.slice(0, 3).join(', ');
+        }
       }
     }
 
-    // Extract physical characteristics
-    const physicalSection = cleanContent.match(/Physical Characteristics[^:]*:\s*\n((?:[^\n]*\n){0,5})/);
+    // Extract physical characteristics - capture all bullets until next section
+    const physicalSection = cleanContent.match(/Physical Characteristics[^:]*:\s*\n?((?:[-•]\s*.+\n?)+?)(?=\n===|\nOriginal|\n\n|$)/si);
     if (physicalSection) {
       const bullets = physicalSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
       if (bullets) {
-        const characteristics = bullets.map(c => c.replace(/[-•]\s*/, '').trim()).filter(c => c);
-        if (characteristics.length > 0) data['Physical Characteristics'] = characteristics.join('; ');
+        const characteristics = bullets.map(c => c.replace(/[-•]\s*/, '').trim()).filter(c => c && c !== 'N/A');
+        if (characteristics.length > 0) {
+          data['Physical Characteristics'] = characteristics.join('; ');
+        }
       }
     }
 
     // Extract release date - capture everything until next section
-    const dateMatch = cleanContent.match(/Original Release Date:\s*\*{0,2}(.+?)(?=\n\*{0,2}Trivia|\n\*{0,2}TRIVIA|\n=|$)/s);
-    if (dateMatch) data['Original Release Date'] = dateMatch[1].replace(/\*\*/g, '').trim();
-
-    // Extract trivia - look for bullet points
-    const triviaSection = cleanContent.match(/Trivia[^:]*:\s*\n((?:[^\n=]*\n){0,10})/i);
-    if (triviaSection) {
-      const bullets = triviaSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
-      if (bullets) {
-        const trivia = bullets.map(t => t.replace(/[-•]\s*/, '').trim()).filter(t => t && !t.startsWith('==='));
-        if (trivia.length > 0) data['Trivia (Interesting facts)'] = trivia.join('; ');
+    const dateMatch = cleanContent.match(/Original Release Date:\s*(.+?)(?=\nTrivia|\n===|$)/si);
+    if (dateMatch) {
+      const dateValue = dateMatch[1].trim();
+      if (dateValue && !dateValue.includes('N/A')) {
+        data['Original Release Date'] = dateValue;
       }
     }
 
-    // Extract awards - capture everything until next section
-    const awardsMatch = cleanContent.match(/Awards:\s*\n?[-•]?\s*(.+?)(?=\n\*{0,2}Common|\n=|$)/s);
-    if (awardsMatch) {
-      const awardsText = awardsMatch[1].replace(/[-•]\s*/, '').replace(/\*\*/g, '').trim();
-      if (awardsText && awardsText !== 'N/A') data['Awards'] = awardsText;
+    // Extract trivia - capture all bullets
+    const triviaSection = cleanContent.match(/Trivia[^:]*:\s*\n?((?:[-•]\s*.+\n?)+?)(?=\n===|\nAwards|$)/si);
+    if (triviaSection) {
+      const bullets = triviaSection[1].match(/[-•]\s*(.+?)(?:\n|$)/g);
+      if (bullets) {
+        const trivia = bullets.map(t => t.replace(/[-•]\s*/, '').trim()).filter(t => t && t !== 'N/A' && !t.startsWith('==='));
+        if (trivia.length > 0) {
+          data['Trivia (Interesting facts)'] = trivia.join('; ');
+        }
+      }
     }
 
-    // Extract Reddit remarks
-    const redditSection = cleanContent.match(/Common Reddit remarks[^:]*:\s*\n((?:[^\n=]*\n){0,10})/i);
+    // Extract awards - handle both single line and bullet format
+    const awardsSection = cleanContent.match(/Awards:\s*\n?((?:[-•]\s*.+\n?)*|.+?)(?=\nCommon Reddit|\n===|$)/si);
+    if (awardsSection) {
+      const awardsText = awardsSection[1].trim();
+      if (awardsText && !awardsText.toLowerCase().includes('n/a') && !awardsText.toLowerCase().includes('none')) {
+        // Check if it's bullet points
+        if (awardsText.includes('-') || awardsText.includes('•')) {
+          const bullets = awardsText.match(/[-•]\s*(.+?)(?:\n|$)/g);
+          if (bullets) {
+            const awards = bullets.map(a => a.replace(/[-•]\s*/, '').trim()).filter(a => a);
+            if (awards.length > 0) {
+              data['Awards'] = awards.join('; ');
+            }
+          }
+        } else {
+          // Single line format
+          data['Awards'] = awardsText;
+        }
+      }
+    }
+
+    // Extract Reddit remarks - handle quotes properly
+    const redditSection = cleanContent.match(/Common Reddit remarks[^:]*:\s*\n?((?:[-•]\s*["""]?.+?["""]?\n?)+)/i);
     if (redditSection) {
-      const bullets = redditSection[1].match(/[-•]\s*"?(.+?)"?(?:\n|$)/g);
+      const bullets = redditSection[1].match(/[-•]\s*["""]?(.+?)["""]?(?:\n|$)/g);
       if (bullets) {
         const remarks = bullets.map(r => {
           return r.replace(/[-•]\s*/, '')
-                  .replace(/^["']/, '')
-                  .replace(/["']$/, '')
+                  .replace(/^["""']/, '')
+                  .replace(/["""']$/, '')
                   .trim();
-        }).filter(r => r && !r.startsWith('==='));
-        if (remarks.length > 0) data['Common Reddit remarks'] = remarks.join('; ');
+        }).filter(r => r && r !== 'N/A' && !r.startsWith('==='));
+        if (remarks.length > 0) {
+          data['Common Reddit remarks'] = remarks.join('; ');
+        }
+      }
+    }
+
+    // Clean up any remaining formatting issues
+    for (const key in data) {
+      if (data[key] !== 'N/A') {
+        // Remove any trailing newlines or section markers
+        data[key] = data[key].replace(/\n===/g, '').replace(/\n+$/g, '').trim();
       }
     }
   } catch (error) {
@@ -136,7 +182,7 @@ function parseLLMOutput(content) {
   }
 
   // Log parsed data for debugging
-  console.log('Parsed data:', data);
+  console.log('Parsed strain data:', JSON.stringify(data, null, 2));
   
   return data;
 }
