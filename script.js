@@ -599,11 +599,27 @@ function parseStrainData(content) {
     }
 
     // Extract awards
-    const awardsMatch = content.match(/Awards:\s*(.+?)(?=\n|Common Reddit|$)/si);
+    const awardsMatch = content.match(/Awards:\s*([\s\S]*?)(?=Common Reddit|$)/i);
     if (awardsMatch && awardsMatch[1].trim()) {
         const awardsText = awardsMatch[1].trim();
         if (!awardsText.toLowerCase().includes('unknown') && !awardsText.toLowerCase().includes('none')) {
-            data.awards = awardsText.split(',').map(award => award.trim()).filter(award => award);
+            // Check if it contains bullet points
+            if (awardsText.includes('-') || awardsText.includes('•')) {
+                // Extract bullet points
+                const bullets = awardsText.match(/[-•]\s*([^\n-•]+)/g);
+                if (bullets) {
+                    data.awards = bullets.map(award => 
+                        award.replace(/[-•]\s*/, '').trim()
+                    ).filter(award => award && award.length > 2);
+                }
+            } else {
+                // Single line or comma-separated
+                data.awards = awardsText.split(/[,;]/).map(award => award.trim()).filter(award => award);
+                // If no commas/semicolons, treat as single award
+                if (data.awards.length === 0 && awardsText.trim()) {
+                    data.awards = [awardsText.trim()];
+                }
+            }
         }
     }
 
