@@ -16,8 +16,10 @@ let rawResponse = ''; // Store raw markdown response from Perplexity
 // Add after the existing global variables
 let isResultsView = false;
 
-// Add a global variable to store physical characteristics:
+// Add global variables to store strain data for image generation:
 let currentPhysicalCharacteristics = '';
+let currentStrainName = '';
+let currentHybridization = '';
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -534,7 +536,10 @@ function parseStrainData(content) {
 
     // Extract strain name
     const nameMatch = content.match(/Strain Name:\s*(.+)/i);
-    if (nameMatch) data.name = nameMatch[1].trim();
+    if (nameMatch) {
+        data.name = nameMatch[1].trim();
+        currentStrainName = data.name;
+    }
 
     // Extract alt names
     const altNamesMatch = content.match(/Alt Name\(s\):\s*(.+)/i);
@@ -550,7 +555,10 @@ function parseStrainData(content) {
 
     // Extract hybridization
     const hybridMatch = content.match(/Hybridization:\s*(.+)/i);
-    if (hybridMatch) data.hybridization = hybridMatch[1].trim();
+    if (hybridMatch) {
+        data.hybridization = hybridMatch[1].trim();
+        currentHybridization = data.hybridization;
+    }
 
     // Extract flavors - look for the section and get exactly 3 bullets
     const flavorsMatch = content.match(/Reported Flavors[^:]*:\s*((?:(?!Reported Effects|Physical Characteristics|===).)+)/si);
@@ -674,6 +682,8 @@ async function generateStrainImage() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                strainName: currentStrainName || '',
+                hybridization: currentHybridization || '',
                 physicalCharacteristics: currentPhysicalCharacteristics
             })
         });
@@ -688,7 +698,7 @@ async function generateStrainImage() {
             // Reset container to show image
             imageContainer.innerHTML = '<img class="generated-image" id="generated-image" alt="Generated strain image">';
             const newImageElement = document.getElementById('generated-image');
-            newImageElement.src = `data:image/png;base64,${data.image}`;
+            newImageElement.src = `data:${data.mime || 'image/png'};base64,${data.image}`;
             imageContainer.classList.add('active');
         } else {
             throw new Error(data.error || 'Failed to generate image');

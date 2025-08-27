@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { physicalCharacteristics } = req.body || {};
+  const { strainName = '', hybridization = '', physicalCharacteristics } = req.body || {};
   if (!physicalCharacteristics) {
     return res.status(400).json({ error: 'Physical characteristics are required' });
   }
@@ -22,12 +22,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Build prompt (kept from your original requirements)
-    const prompt = `Studio photograph of a single cannabis bud still on its stem.
-Based on these physical characteristics: ${physicalCharacteristics}.
-The bud is set against a COMPLETELY BLACK, non-reflective background.
-Focus is tack-sharp on trichomes and pistils. Edges of the bud are crisp and clear,
-with absolutely no white border, halo, or outline. There shouldn't be ANY white color in the image.`;
+    // Build prompt with new ultra-macro style
+    const prompt = `Ultra-macro photograph of a ${strainName} ${hybridization} cannabis bud, taken with a 100mm lens at f/8. The bud is asymmetrical with irregular shape and imperfect hand trim. ${physicalCharacteristics} Some visible trimming flaws. Texture is uneven, slightly rough. Background is matte black, with a soft natural shadow below. Avoid excessive symmetry, over-sharpening, and unnatural density of pistils or trichomes. 1:1 (square ratio).`;
 
     // Lazy-import to avoid ESM/CJS hassles
     const { GoogleGenAI } = await import('@google/genai');
@@ -36,7 +32,7 @@ with absolutely no white border, halo, or outline. There shouldn't be ANY white 
     // Call Gemini 2.5 Flash Image Preview
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image-preview',
-      contents: prompt
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
       // You can add generationConfig here if needed
     });
 
