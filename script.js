@@ -465,9 +465,9 @@ function formatStrainDataAsCards(content) {
                     ${strainData.redditRemarks.length > 0 ? `
                         <div class="strain-field">
                             <h5>Common Reddit Remarks</h5>
-                            <div class="reddit-remarks">
-                                ${strainData.redditRemarks.map(remark => `<div class="reddit-item"><span class="bullet">•</span>${remark}</div>`).join('')}
-                            </div>
+                            <ul class="reddit-remarks">
+                                ${strainData.redditRemarks.map(remark => `<li class="reddit-item">${remark}</li>`).join('')}
+                            </ul>
                         </div>
                     ` : ''}
                 </div>

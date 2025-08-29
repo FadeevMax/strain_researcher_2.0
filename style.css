@@ -570,9 +570,22 @@ li {
 .trivia-list {
     list-style-type: none;
     padding-left: 0;
+    margin: 0;
 }
+
+.trivia-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #ffffff;
+    line-height: 1.4;
+}
+
 .trivia-list li:before {
-    content: '• ';
+    content: '•';
+    position: absolute;
+    left: 0;
     color: #a1a1a1;
 }
 
@@ -1086,19 +1099,26 @@ li {
 
 /* Reddit remarks styling */
 .reddit-remarks {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
 }
 
 .reddit-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
     font-size: 15px;
     color: #ffffff;
     line-height: 1.4;
     font-style: italic;
+}
+
+.reddit-item:before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #a1a1a1;
 }
 
 /* Mobile fixes for suggestions container */
