@@ -30,8 +30,8 @@ function initializeApp() {
     // Add event listeners
     searchForm.addEventListener('submit', handleSearch);
     
-    // Initialize animated suggestions
-    initializeAnimatedSuggestions();
+    // Initialize static suggestions
+    initializeStaticSuggestions();
     
     // Focus on input
     strainInput.focus();
@@ -710,9 +710,23 @@ async function generateStrainImage() {
     }
 }
 
-// Add this after the existing initialization code
+// Initialize static suggestions
+function initializeStaticSuggestions() {
+    const buttons = document.querySelectorAll('.suggestion-btn');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const strain = this.getAttribute('data-strain');
+            searchStrain(strain);
+        });
+    });
+}
+
+// Preserved for future use - animated carousel version
 function initializeAnimatedSuggestions() {
     const track = document.getElementById('suggestionsTrack');
+    if (!track) return; // Exit if track doesn't exist
+    
     const buttons = track.querySelectorAll('.suggestion-btn');
 
     // Add hover listeners to pause/resume animation
