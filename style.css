@@ -328,11 +328,7 @@ body::before {
     text-align: left;
 }
 
-.suggestions-track {
-    display: flex;
-    gap: 12px;
-    animation: slideLeft 30s linear infinite;
-    width: fit-content;
+.suggestions-wrapper {
     overflow: hidden;
     position: relative;
     mask: linear-gradient(to right, 
@@ -345,6 +341,13 @@ body::before {
         black 5%, 
         black 95%, 
         transparent 100%);
+}
+
+.suggestions-track {
+    display: flex;
+    gap: 12px;
+    animation: slideLeft 30s linear infinite;
+    width: fit-content;
 }
 
 .suggestions-track.paused {
