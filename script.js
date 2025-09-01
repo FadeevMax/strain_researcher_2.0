@@ -30,13 +30,8 @@ function initializeApp() {
     // Add event listeners
     searchForm.addEventListener('submit', handleSearch);
     
-    // Add suggestion button listeners
-    suggestionBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const strain = this.getAttribute('data-strain');
-            searchStrain(strain);
-        });
-    });
+    // Initialize animated suggestions
+    initializeAnimatedSuggestions();
     
     // Focus on input
     strainInput.focus();
@@ -713,6 +708,38 @@ async function generateStrainImage() {
         button.classList.remove('loading');
         button.innerHTML = 'Generate Strain Image';
     }
+}
+
+// Add this after the existing initialization code
+function initializeAnimatedSuggestions() {
+    const track = document.getElementById('suggestionsTrack');
+    const buttons = track.querySelectorAll('.suggestion-btn');
+
+    // Add hover listeners to pause/resume animation
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', () => {
+            track.classList.add('paused');
+        });
+
+        button.addEventListener('mouseleave', () => {
+            track.classList.remove('paused');
+        });
+
+        // Keep existing click functionality
+        button.addEventListener('click', function() {
+            const strain = this.getAttribute('data-strain');
+            searchStrain(strain);
+        });
+    });
+
+    // Handle container hover as well
+    track.addEventListener('mouseenter', () => {
+        track.classList.add('paused');
+    });
+
+    track.addEventListener('mouseleave', () => {
+        track.classList.remove('paused');
+    });
 }
 
 // Make the function globally accessible

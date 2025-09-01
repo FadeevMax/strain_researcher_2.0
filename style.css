@@ -319,6 +319,18 @@ body::before {
     width: 120%;
     max-width: 1000px;
     margin: 40px auto 0;
+    overflow: hidden;
+    position: relative;
+    mask: linear-gradient(to right, 
+        transparent 0%, 
+        black 5%, 
+        black 95%, 
+        transparent 100%);
+    -webkit-mask: linear-gradient(to right, 
+        transparent 0%, 
+        black 5%, 
+        black 95%, 
+        transparent 100%);
 }
 
 .suggestions-title {
@@ -328,12 +340,24 @@ body::before {
     text-align: left;
 }
 
-.suggestions {
+.suggestions-track {
     display: flex;
-    flex-wrap: nowrap;
     gap: 12px;
-    justify-content: space-between;
-    overflow-x: auto;
+    animation: slideLeft 30s linear infinite;
+    width: fit-content;
+}
+
+.suggestions-track.paused {
+    animation-play-state: paused;
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-100% + 1000px));
+    }
 }
 
 .suggestion-btn {
@@ -1121,7 +1145,7 @@ li {
     color: #a1a1a1;
 }
 
-/* Mobile fixes for suggestions container */
+/* Mobile fixes for animated suggestions */
 @media (max-width: 768px) {
     .suggestions-container {
         width: 100%;
@@ -1130,31 +1154,13 @@ li {
         box-sizing: border-box;
     }
     
-    .suggestions {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .suggestions::-webkit-scrollbar {
-        height: 4px;
-    }
-    
-    .suggestions::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .suggestions::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 2px;
-    }
-    
-    .suggestion-btn {
-        flex: 0 0 auto;
-        min-width: fit-content;
+    @keyframes slideLeft {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-100% + 100vw));
+        }
     }
 }
 
