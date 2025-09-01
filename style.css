@@ -355,6 +355,14 @@ body::before {
     animation-play-state: paused;
 }
 
+.suggestions-wrapper-static {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 4px;
+}
+
 @keyframes slideLeft {
     0% {
         transform: translateX(0);
