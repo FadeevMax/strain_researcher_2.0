@@ -331,21 +331,21 @@ async function findStrainInDatabase(sheets, spreadsheetId, strainQuery) {
 
     const headers = rows[0];
     const strainNameIndex = headers.indexOf('Strain name');
-    const altNamesIndex = headers.indexOf('Alt Name(s)');
-    const nicknamesIndex = headers.indexOf('Nickname(s)');
 
-    // Normalize the query
+    if (strainNameIndex === -1) return null; // Strain name column not found
+
+    // Convert user input to lowercase for exact match
     const normalizedQuery = strainQuery.toLowerCase().trim();
 
-    // Search through all rows (skip header)
+    // Search through all rows (skip header) - exact match only
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       if (!row[strainNameIndex]) continue;
 
-      // Check main strain name
-      if (row[strainNameIndex].toLowerCase().includes(normalizedQuery) ||
-          normalizedQuery.includes(row[strainNameIndex].toLowerCase())) {
-        
+      // Check if strain name matches exactly (case-insensitive)
+      const strainNameLower = row[strainNameIndex].toLowerCase().trim();
+      
+      if (strainNameLower === normalizedQuery) {
         // Convert row to object with headers
         const strainData = {};
         headers.forEach((header, index) => {
@@ -354,33 +354,9 @@ async function findStrainInDatabase(sheets, spreadsheetId, strainQuery) {
         
         return { data: strainData, rowIndex: i + 1 }; // +1 because sheets are 1-indexed
       }
-
-      // Check alt names
-      if (altNamesIndex !== -1 && row[altNamesIndex]) {
-        const altNames = row[altNamesIndex].split(',').map(n => n.trim().toLowerCase());
-        if (altNames.some(name => name === normalizedQuery || normalizedQuery.includes(name))) {
-          const strainData = {};
-          headers.forEach((header, index) => {
-            strainData[header] = row[index] || 'N/A';
-          });
-          return { data: strainData, rowIndex: i + 1 };
-        }
-      }
-
-      // Check nicknames
-      if (nicknamesIndex !== -1 && row[nicknamesIndex]) {
-        const nicknames = row[nicknamesIndex].split(',').map(n => n.trim().toLowerCase());
-        if (nicknames.some(name => name === normalizedQuery || normalizedQuery.includes(name))) {
-          const strainData = {};
-          headers.forEach((header, index) => {
-            strainData[header] = row[index] || 'N/A';
-          });
-          return { data: strainData, rowIndex: i + 1 };
-        }
-      }
     }
 
-    return null;
+    return null; // No exact match found
   } catch (error) {
     console.error('Error searching database:', error);
     return null;
