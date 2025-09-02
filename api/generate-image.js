@@ -23,7 +23,13 @@ export default async function handler(req, res) {
 
   try {
     // Build prompt with new ultra-macro style
-    const prompt = `Ultra-macro photograph of a ${strainName} ${hybridization} cannabis bud, taken with a 100mm lens at f/8. The bud is asymmetrical with irregular shape and imperfect hand trim. ${physicalCharacteristics} Some visible trimming flaws. Texture is uneven, slightly rough. Background is matte black, with a soft natural shadow below. Avoid excessive symmetry, over-sharpening, and unnatural density of pistils or trichomes. 1:1 (square ratio).`;
+    const prompt = `Ultra-macro photograph of a ${strainName} ${hybridization} cannabis bud, taken with a 100mm lens at f/8. The bud is asymmetrical with irregular shape and imperfect hand trim. ${physicalCharacteristics}. Some visible trimming flaws. Texture is uneven, slightly rough. Background is plain white, standard for ecommerce. Avoid excessive symmetry, over-sharpening, and unnatural density of pistils or trichomes. 1:1 (square ratio).
+
+### Rules:
+- **NO** large orange pistils
+- **NO** smooth looking surfaces anywhere, the outer textures must be rough from leaves 
+- **NO** symmetry, the shape must always be distinctly different on the left and right side
+- **NO** visible stem on the bottom (especially NO long stem)`;
 
     // Lazy-import to avoid ESM/CJS hassles
     const { GoogleGenAI } = await import('@google/genai');
